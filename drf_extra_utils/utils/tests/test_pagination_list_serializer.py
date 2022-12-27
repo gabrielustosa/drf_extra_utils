@@ -6,7 +6,7 @@ from django.core.paginator import Paginator, InvalidPage
 from rest_framework.exceptions import NotFound
 from rest_framework.fields import IntegerField
 
-from drf_extra_utils.related_object.fields import RelatedObjectListSerializer
+from drf_extra_utils.utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.tests.serializers import FooSerializer
 from drf_extra_utils.tests.models import FooModel
 
@@ -40,8 +40,8 @@ class TestRelatedObjectListSerializer:
         self.objects = [n for n in range(10)]
         self.models = FooModel.objects.filter(id__in=[FooModel.objects.create(bar='test').id for _ in range(10)])
 
-    def test_related_object_list_serializer_model_filtering(self):
-        serializer = RelatedObjectListSerializer(
+    def test_list_serializer_model_filtering(self):
+        serializer = PaginatedListSerializer(
             child=FooSerializer(),
             filter={'id__gte': 5}
         )
@@ -51,8 +51,8 @@ class TestRelatedObjectListSerializer:
 
         assert data == expected_data
 
-    def test_related_object_list_serializer_model_pagination(self):
-        serializer = RelatedObjectListSerializer(
+    def test_list_serializer_model_pagination(self):
+        serializer = PaginatedListSerializer(
             child=FooSerializer(),
             paginator=FakePaginator(),
         )
@@ -65,16 +65,16 @@ class TestRelatedObjectListSerializer:
 
         assert data == expected_data
 
-    def test_related_object_list_serializer_model_without_paginator(self):
-        serializer = RelatedObjectListSerializer(child=FooSerializer())
+    def test_list_serializer_model_without_paginator(self):
+        serializer = PaginatedListSerializer(child=FooSerializer())
         data = serializer.to_representation(self.models)
 
         expected_data = FooSerializer(self.models, many=True).data
 
         assert data == expected_data
 
-    def test_related_object_list_serializer_pagination_and_filtering(self):
-        serializer = RelatedObjectListSerializer(
+    def test_list_serializer_model_pagination_and_filtering(self):
+        serializer = PaginatedListSerializer(
             child=FooSerializer(),
             paginator=FakePaginator(),
             filter={'id__gte': 5}
@@ -88,8 +88,20 @@ class TestRelatedObjectListSerializer:
 
         assert data == expected_data
 
-    def test_related_object_list_serializer_pagination(self):
-        serializer = RelatedObjectListSerializer(child=IntegerField(), paginator=FakePaginator())
+    def test_list_serializer_model_filtering_without_matching(self):
+        serializer = PaginatedListSerializer(
+            child=FooSerializer(),
+            paginator=FakePaginator(),
+            filter={'bar': '123'}
+        )
+        data = serializer.to_representation(self.models)
+
+        expected_data = []
+
+        assert data == expected_data
+
+    def test_list_serializer_pagination(self):
+        serializer = PaginatedListSerializer(child=IntegerField(), paginator=FakePaginator())
         data = serializer.to_representation(self.objects)
 
         expected_data = {
@@ -99,14 +111,14 @@ class TestRelatedObjectListSerializer:
 
         assert data == expected_data
 
-    def test_related_object_list_serializer_without_paginator(self):
-        serializer = RelatedObjectListSerializer(child=IntegerField())
+    def test_list_serializer_without_paginator(self):
+        serializer = PaginatedListSerializer(child=IntegerField())
         data = serializer.to_representation(self.objects)
 
         assert data == self.objects
 
-    def test_related_object_list_serializer_filtering(self):
-        serializer = RelatedObjectListSerializer(
+    def test_list_serializer_filtering(self):
+        serializer = PaginatedListSerializer(
             child=IntegerField(),
             filter=lambda n: n >= 5,
         )
@@ -116,8 +128,8 @@ class TestRelatedObjectListSerializer:
 
         assert data == expected_data
 
-    def test_related_object_list_serializer_filtering_and_pagination(self):
-        serializer = RelatedObjectListSerializer(
+    def test_list_serializer_filtering_and_pagination(self):
+        serializer = PaginatedListSerializer(
             child=IntegerField(),
             paginator=FakePaginator(),
             filter=lambda n: n >= 5,
@@ -128,5 +140,16 @@ class TestRelatedObjectListSerializer:
             'count': 5,
             'results': self.objects[5:7]
         }
+
+        assert data == expected_data
+
+    def test_list_serializer_filtering_without_matching(self):
+        serializer = PaginatedListSerializer(
+            child=IntegerField(),
+            filter=lambda n: n >= 10,
+        )
+        data = serializer.to_representation(self.objects)
+
+        expected_data = []
 
         assert data == expected_data

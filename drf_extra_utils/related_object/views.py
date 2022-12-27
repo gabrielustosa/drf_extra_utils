@@ -22,8 +22,9 @@ class RelatedObjectViewMixin:
     @cached_property
     def related_objects(self):
         nested_fields = dict()
+        pattern = re.compile((r'fields\[(\w+)]'))
         for field_name, fields in self.request.query_params.items():
-            match = re.search(r'fields\[(\w+)]', field_name)
+            match = pattern.match(field_name)
             if match:
                 nested_fields[match.group(1)] = fields.split(',')
         return nested_fields

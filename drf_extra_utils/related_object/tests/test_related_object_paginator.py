@@ -148,24 +148,24 @@ class TestRelatedObjectPaginator:
 
         assert 'page%281%29' not in previous_link
 
-    def test_related_object_paginator_replace_page_method(self):
+    def test_related_object_paginator_replace_page_param_method(self):
         self.paginator.related_object_fields = ['id', 'name', 'page_size(2)', 'page(2)']
 
-        query_param = self.paginator.replace_page(5)
+        query_param = self.paginator.replace_page_param(5)
 
         assert 'page(5)' in query_param
 
-    def test_related_object_paginator_replace_page_method_if_page_is_not_in_fields(self):
+    def test_related_object_paginator_replace_page_param_method_if_page_is_not_in_fields(self):
         self.paginator.related_object_fields = ['id', 'name', 'page_size(2)']
 
-        query_param = self.paginator.replace_page(5)
+        query_param = self.paginator.replace_page_param(5)
 
         assert 'page(5)' in query_param
 
-    def test_related_object_paginator_remove_page_method(self):
+    def test_related_object_paginator_remove_page_param_method(self):
         self.paginator.related_object_fields = ['id', 'name', 'page_size(2)', 'page(2)']
 
-        query_param = self.paginator.remove_page()
+        query_param = self.paginator.remove_page_param()
 
         assert 'page(2)' not in query_param
 

@@ -22,17 +22,9 @@ class OrderedModel(models.Model):
         last_order = self.get_last_order()
         return last_order + 1 if last_order is not None else 1
 
-    def do_after_update(self):
-        pass
-
-    def do_after_create(self):
-        pass
-
     def save(self, force_insert=False, **kwargs):
         if force_insert:
             self.order = self.get_next_order()
-
-            self.do_after_create()
         else:
             new_order = self.order
 
@@ -47,10 +39,9 @@ class OrderedModel(models.Model):
             self.get_queryset().filter(**query).update(
                 order=models.ExpressionWrapper(models.F('order') + number, output_field=models.PositiveIntegerField()))
 
-            self.do_after_update()
         super().save(force_insert, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
+    def delete(self, *args, **kwargs):
         self.get_queryset().filter(order__gt=self.order).update(
             order=models.ExpressionWrapper(models.F('order') - 1, output_field=models.PositiveIntegerField()))
-        return super().delete(using, keep_parents)
+        return super().delete(*args, **kwargs)

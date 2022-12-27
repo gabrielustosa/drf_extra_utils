@@ -6,7 +6,7 @@ from django.utils.module_loading import import_string
 
 from rest_framework.exceptions import PermissionDenied
 
-from drf_extra_utils.related_object.fields import RelatedObjectListSerializer
+from drf_extra_utils.utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 
@@ -35,7 +35,7 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
     @classmethod
     def many_init(cls, *args, **kwargs):
         kwargs['child'] = cls(fields=kwargs.pop('fields', None))
-        return RelatedObjectListSerializer(*args, **kwargs)
+        return PaginatedListSerializer(*args, **kwargs)
 
     @cached_property
     def related_objects(self):
