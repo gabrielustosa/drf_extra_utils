@@ -20,17 +20,14 @@ class RelatedObjectPaginator:
     related_object_fields: List[str]
     request: Request
 
-    def paginate_queryset(self, queryset):
-        page_size = self.get_page_size
-
-        if int(page_size) <= 0:
+    def paginate_data(self, data):
+        if int(self.page_size) <= 0:
             raise NotFound(f'Invalid page size for `{self.related_object_name}`.')
 
-        self.paginator = Paginator(queryset, page_size)
-        page_number = self.get_page_number
+        self.paginator = Paginator(data, self.page_size)
 
         try:
-            self.page = self.paginator.page(page_number)
+            self.page = self.paginator.page(self.page_number)
         except InvalidPage:
             raise NotFound(f'Invalid page for `{self.related_object_name}`.')
 
@@ -41,9 +38,9 @@ class RelatedObjectPaginator:
         return self.paginator.num_pages
 
     @cached_property
-    def get_page_number(self):
+    def page_number(self):
         """
-        Return a page number which is in fields list.
+        Return a page number which is in related objects fields list.
 
         Example:
             ['id', 'title', 'page(3)'] - it'll return 3.
@@ -53,18 +50,19 @@ class RelatedObjectPaginator:
         return next((pattern.findall(item)[0] for item in self.related_object_fields if pattern.match(item)), 1)
 
     @cached_property
-    def get_page_size(self):
+    def page_size(self):
         """
-        Return a page size number which is in fields list.
+        Return a page size number which is in related objects fields list.
 
         Example:
-            ['id', 'title', 'page_size(50)'] - it'll return 3.
+            ['id', 'title', 'page_size(50)'] - it'll return 50.
             ['id', 'title'] - it'll return the default RELATED_OBJECT_PAGINATED_BY value.
         """
         pattern = re.compile(r'page_size\(([0-9_]+)\)')
         return next((pattern.findall(item)[0] for item in self.related_object_fields if pattern.match(item)), RELATED_OBJECT_PAGINATED_BY)
 
-    def get_query_param(self):
+    @property
+    def field_param(self):
         return f'fields[{self.related_object_name}]'
 
     def get_page_param(self, page_number):
@@ -75,7 +73,7 @@ class RelatedObjectPaginator:
             return None
         url = self.request.build_absolute_uri()
         page_number = self.page.next_page_number()
-        return replace_query_param(url, self.get_query_param(), self.replace_page(page_number))
+        return replace_query_param(url, self.field_param, self.replace_page(page_number))
 
     def get_previous_link(self):
         if not self.page.has_previous():
@@ -83,18 +81,18 @@ class RelatedObjectPaginator:
         url = self.request.build_absolute_uri()
         page_number = self.page.previous_page_number()
         if page_number == 1:
-            return replace_query_param(url, self.get_query_param(), self.remove_page())
-        return replace_query_param(url, self.get_query_param(), self.replace_page(page_number))
+            return replace_query_param(url, self.field_param, self.remove_page())
+        return replace_query_param(url, self.field_param, self.replace_page(page_number))
 
     def replace_page(self, page):
-        if self.get_page_param(self.get_page_number) not in self.related_object_fields:
-            self.related_object_fields.append(self.get_page_param(self.get_page_number))
+        if self.get_page_param(self.page_number) not in self.related_object_fields:
+            self.related_object_fields.append(self.get_page_param(self.page_number))
         query_fields = ','.join(self.related_object_fields)
-        return query_fields.replace(self.get_page_param(self.get_page_number), self.get_page_param(page))
+        return query_fields.replace(self.get_page_param(self.page_number), self.get_page_param(page))
 
     def remove_page(self):
         return ','.join(
-            [field for field in self.related_object_fields if field != self.get_page_param(self.get_page_number)]
+            [field for field in self.related_object_fields if field != self.get_page_param(self.page_number)]
         )
 
     def get_paginated_data(self, data):

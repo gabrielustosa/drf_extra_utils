@@ -4,7 +4,7 @@ from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
 
-from .models import DummyModelAnnotation, FooModel
+from drf_extra_utils.tests.models import DummyModelAnnotation, FooModel
 
 
 def annotate_in_model(model):

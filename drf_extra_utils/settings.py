@@ -34,7 +34,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "drf_extra_utils.annotations.tests",
+    "drf_extra_utils.tests",
 )
 
 PASSWORD_HASHERS = (
@@ -43,7 +43,6 @@ PASSWORD_HASHERS = (
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
     "django.contrib.auth.hashers.BCryptPasswordHasher",
     "django.contrib.auth.hashers.MD5PasswordHasher",
-    "django.contrib.auth.hashers.CryptPasswordHasher",
 )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

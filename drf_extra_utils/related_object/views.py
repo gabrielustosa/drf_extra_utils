@@ -21,12 +21,12 @@ class RelatedObjectViewMixin:
 
     @cached_property
     def related_objects(self):
-        pattern = re.compile(r'fields\[(\w+)]')
-        return {
-            pattern.findall(field_name)[0]: fields.split(',')
-            for field_name, fields in self.request.query_params.items()
-            if pattern.match(field_name)
-        }
+        nested_fields = dict()
+        for field_name, fields in self.request.query_params.items():
+            match = re.search(r'fields\[(\w+)]', field_name)
+            if match:
+                nested_fields[match.group(1)] = fields.split(',')
+        return nested_fields
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

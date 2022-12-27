@@ -8,25 +8,34 @@ from rest_framework.exceptions import PermissionDenied
 
 from drf_extra_utils.related_object.fields import RelatedObjectListSerializer
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator
+from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 
 
-class RelatedObjectMixin:
+class RelatedObjectAnnotations:
+
+    def get_related_object_annotations(self, field_name):
+        annotation_class = self.get_related_object_annotation_class(field_name)
+        if annotation_class is None:
+            return None
+        related_object_fields = self.related_objects.get(field_name)
+        return annotation_class.get_annotations(*related_object_fields)
+
+    def get_related_object_annotation_class(self, field_name):
+        model = self.get_related_object_model(field_name)
+        return getattr(model, 'annotation_class', None)
+
+    def optimize_related_object_annotation(self, queryset, field_name, annotations):
+        return queryset.prefetch_related(
+            Prefetch(field_name, self.get_related_object_model(field_name).objects.annotate(**annotations))
+        )
+
+
+class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
 
     @classmethod
     def many_init(cls, *args, **kwargs):
         kwargs['child'] = cls(fields=kwargs.pop('fields', None))
         return RelatedObjectListSerializer(*args, **kwargs)
-
-    @cached_property
-    def related_objects_annotations(self):
-        object_annotations = {}
-        for field_name, fields in self.related_objects.items():
-            annotation_class = getattr(self.get_related_object_model(field_name), 'annotation_class', None)
-            if annotation_class is not None:
-                annotations = annotation_class.get_annotations(*fields)
-                if annotations:
-                    object_annotations[field_name] = annotations
-        return object_annotations
 
     @cached_property
     def related_objects(self):
@@ -49,6 +58,13 @@ class RelatedObjectMixin:
             serializer = import_string(serializer)
         return serializer
 
+    def get_related_object_model(self, field_name):
+        serializer = self.get_related_object_serializer(field_name)
+        return serializer.Meta.model
+
+    def related_object_is_prefetch(self, field_name):
+        return self._get_related_object_option(field_name, 'many', False)
+
     def check_related_object_permission(self, obj, related_object_name):
         permissions = self._get_related_object_option(related_object_name, 'permissions', [])
 
@@ -60,32 +76,21 @@ class RelatedObjectMixin:
                     detail=f'You do not have permission to access the related object `{related_object_name}`'
                 )
 
-    def optimize_related_object_annotations(self, queryset):
-        for field_name, annotations in self.related_objects_annotations.items():
-            queryset = queryset.prefetch_related(
-                Prefetch(field_name, self.get_related_object_model(field_name).objects.annotate(**annotations))
-            )
-        return queryset
-
-    def optimize_related_objects(self, queryset):
-        for field_name in set(self.related_objects.keys()) - set(self.related_objects_annotations.keys()):
-            if self.related_object_is_prefetch(field_name):
-                queryset = queryset.prefetch_related(field_name)
-            else:
-                queryset = queryset.select_related(field_name)
+    def optimize_related_object(self, queryset, field_name):
+        if self.related_object_is_prefetch(field_name):
+            queryset = queryset.prefetch_related(field_name)
+        else:
+            queryset = queryset.select_related(field_name)
         return queryset
 
     def auto_optimize_related_object(self, queryset):
-        queryset = self.optimize_related_objects(queryset)
-        queryset = self.optimize_related_object_annotations(queryset)
+        for field_name in self.related_objects.keys():
+            annotations = self.get_related_object_annotations(field_name)
+            if annotations:
+                queryset = self.optimize_related_object_annotation(queryset, field_name, annotations)
+            else:
+                queryset = self.optimize_related_object(queryset, field_name)
         return queryset
-
-    def get_related_object_model(self, field_name):
-        serializer = self.get_related_object_serializer(field_name)
-        return serializer.Meta.model
-
-    def related_object_is_prefetch(self, field_name):
-        return self._get_related_object_option(field_name, 'many', False)
 
     def _get_related_objects_fields(self):
         related_objects_fields = OrderedDict()

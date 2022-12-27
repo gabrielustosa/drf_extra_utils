@@ -11,15 +11,16 @@ class RelatedObjectListSerializer(serializers.ListSerializer):
         super().__init__(*args, **kwargs)
 
     def to_representation(self, data):
-        if isinstance(data, Manager):
-            if self.filter:
-                data = data.filter(**self.filter)
-            iterable = data.all()
+        iterable = data.all() if isinstance(data, Manager) else data
 
-            if self.paginator:
-                iterable = self.paginator.paginate_queryset(iterable)
-        else:
-            iterable = data
+        if self.filter is not None:
+            if hasattr(iterable, 'filter'):
+                iterable = iterable.filter(**self.filter)
+            elif isinstance(iterable, list):
+                iterable = list(filter(self.filter, iterable))
+
+        if self.paginator:
+            iterable = self.paginator.paginate_data(iterable)
 
         ret = [self.child.to_representation(item) for item in iterable]
 
