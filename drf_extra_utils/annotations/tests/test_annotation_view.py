@@ -119,7 +119,7 @@ class TestAnnotationView(TestCase):
 
         assert response.data == expected
 
-    def tset_annotation_dynamic_fields_all(self):
+    def test_annotation_dynamic_fields_all(self):
         response = self.client.get(f'{self.dynamic_url}?fields=@all')
 
         expected_data = {

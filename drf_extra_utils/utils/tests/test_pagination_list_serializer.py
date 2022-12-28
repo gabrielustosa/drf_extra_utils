@@ -16,10 +16,7 @@ class FakePaginator:
     def paginate_data(self, data):
         self.paginator = Paginator(data, 2)
 
-        try:
-            page = self.paginator.page(1)
-        except InvalidPage:
-            raise NotFound('Invalid page.')
+        page = self.paginator.page(1)
 
         return list(page)
 

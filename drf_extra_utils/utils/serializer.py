@@ -48,7 +48,6 @@ class PermissionForFieldMixin:
         for fields, permissions in self.permissions_for_field.items():
             if field in fields:
                 return permissions
-        return []
 
     def check_field_permission(self, field_name, obj):
         request = self.context.get('request')
