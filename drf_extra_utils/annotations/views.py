@@ -1,5 +1,6 @@
 class AnnotationViewMixin:
     """
+    Mixin for annotate model annotations to queryset.
     """
 
     def get_queryset(self):
@@ -12,13 +13,15 @@ class AnnotationViewMixin:
         if annotation_class:
             annotations = None
 
+            # optimize annotations 
             fields = self.request.query_params.get('fields')
             if fields:
                 try:
-                    # TODO ADD CUSTOM FIELDS TO SERIALIZER AND TEST
+                    # pass fields to serializer to handle if there are a field type in fields like @min,@default or @all
                     fields = serializer(fields=fields.split(',')).fields.keys()
                     annotations = annotation_class.get_annotations(*fields)
                 except TypeError:
+                    # if the serializer don't inherit DynamicModelFieldsMixin
                     pass
 
             if annotations is None:

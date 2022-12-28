@@ -2,6 +2,11 @@ from rest_framework import serializers
 
 
 class AnnotationDictField(serializers.Field):
+    """
+    AnnotationDictField is a field to handle with a list of annotations.
+
+    * Children of this field must be AnnotationField
+    """
 
     def __init__(self, *args, **kwargs):
         self.children = kwargs.pop('children')

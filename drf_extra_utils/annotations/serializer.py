@@ -1,4 +1,8 @@
 class AnnotationFieldMixin:
+    """
+    Mixin for appending annotations in serializer fields.
+    """
+
     def get_fields(self):
         fields = super().get_fields()
 

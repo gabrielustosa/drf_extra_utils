@@ -17,6 +17,9 @@ class DynamicFieldViewMixin:
 
 
 class PermissionByActionMixin:
+    """
+    Mixin that allows you to set different permissions for different action view.
+    """
     permission_classes_by_action = {
         'default': [AllowAny],
     }

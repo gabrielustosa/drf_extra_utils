@@ -16,6 +16,10 @@ RELATED_OBJECT_PAGINATED_BY = 100
 
 @dataclass
 class RelatedObjectPaginator:
+    """
+    Paginator for related objects.
+    """
+
     related_object_name: str
     related_object_fields: List[str]
     request: Request
@@ -42,7 +46,7 @@ class RelatedObjectPaginator:
         """
         Return a page number which is in related objects fields list.
 
-        Example:
+        example:
             ['id', 'title', 'page(3)'] - it'll return 3.
             ['id', 'title'] - it'll return 1.
         """
@@ -58,7 +62,7 @@ class RelatedObjectPaginator:
         """
         Return a page size number which is in related objects fields list.
 
-        Example:
+        example:
             ['id', 'title', 'page_size(50)'] - it'll return 50.
             ['id', 'title'] - it'll return the default RELATED_OBJECT_PAGINATED_BY value.
         """
@@ -93,12 +97,25 @@ class RelatedObjectPaginator:
         return replace_query_param(url, self.field_param, self.replace_page_param(page_number))
 
     def replace_page_param(self, page):
+        """
+        Replace url query page param.
+
+        example:
+            replace_page_param(4) -> https://example/?fields[model]=@all,page(3)
+            result -> https://example/?fields[model]=@all,page(4)
+        """
         if self.get_page_param(self.page_number) not in self.related_object_fields:
             self.related_object_fields.append(self.get_page_param(self.page_number))
         query_fields = ','.join(self.related_object_fields)
         return query_fields.replace(self.get_page_param(self.page_number), self.get_page_param(page))
 
     def remove_page_param(self):
+        """
+        Remove url query page param
+        example:
+            remove_page_param() -> https://example/?fields[model]=@all,page(3)
+            result -> https://example/?fields[model]=@all
+        """
         fields_list = [field for field in self.related_object_fields if field != self.get_page_param(self.page_number)]
         return ','.join(fields_list)
 

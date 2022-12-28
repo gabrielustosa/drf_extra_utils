@@ -12,15 +12,20 @@ from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 
 
 class RelatedObjectAnnotations:
+    """
+    Mixin to return related object annotations.
+    """
 
     def get_related_object_annotations(self, field_name):
         annotation_class = self.get_related_object_annotation_class(field_name)
         if annotation_class is None:
             return None
         related_object_fields = self.related_objects.get(field_name)
-        # TODO ADD THIS TO TESTS
+
+        # pass fields to related object serializer to handle if there are a field type in fields like @all or @default
         serializer = self.get_related_object_serializer(field_name)
         fields = serializer(fields=related_object_fields).fields.keys()
+
         return annotation_class.get_annotations(*fields)
 
     def get_related_object_annotation_class(self, field_name):
@@ -34,6 +39,36 @@ class RelatedObjectAnnotations:
 
 
 class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
+    """
+    Related object is any field that is related with the model, like ForeignKeys and [One/Many]ToMany fields.
+
+    You can "expand" this fields by passing fields[related_object_name]=id,name,test in url query params.
+
+    The related objects should be declared within the serializer's Meta class, as a dictionary, where:
+
+        * The keys must be the name of the reverse relation of this model.
+        * The values are the related object options, which are:
+            - serializer: The serializer of the related model. (to avoid circular import you can use string reference to
+            the serializer like 'myapp.serializer.MySerializer')
+            - many (Optional[Boolean]): Whether the related object is a [one/many]-to-many field.
+            - filter (Optional[Dict]): A filtering option to related object queryset (Only take if many option is True).
+            - permissions (Optional[Dict]): Permission list to check if user is able to access the related object.
+
+    example:
+
+        class TestSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = Test
+                fields = ('id', 'test')
+                related_objects = {
+                    'model': {
+                        'serializer': ModelSerializer,
+                        'many': True,
+                        'filter': {'is_published': True, 'name__startswith': 'test'},
+                        'permissions': [IsAuthenticated]
+                    }
+                }
+    """
 
     @classmethod
     def many_init(cls, *args, **kwargs):

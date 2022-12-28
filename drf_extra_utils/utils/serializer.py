@@ -29,7 +29,8 @@ class CreateOrUpdateOnlyMixin:
 
 class PermissionForFieldMixin:
     """
-    A mixin for ModelSerializer that set permissions for performing actions using model instance.
+    A mixin for ModelSerializer that allows set permissions for certain fields in your serializer that are related to
+    model instances.
     """
 
     @property
