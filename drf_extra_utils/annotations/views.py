@@ -15,6 +15,7 @@ class AnnotationViewMixin:
             fields = self.request.query_params.get('fields')
             if fields:
                 try:
+                    # TODO ADD CUSTOM FIELDS TO SERIALIZER AND TEST
                     fields = serializer(fields=fields.split(',')).fields.keys()
                     annotations = annotation_class.get_annotations(*fields)
                 except TypeError:

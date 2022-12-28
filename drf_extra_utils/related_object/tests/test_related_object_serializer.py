@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from . import serializers
 
-from drf_extra_utils.tests import models
+from ...utils.tests import models
 
 
 class TestRelatedObjectSerializer(TestCase):

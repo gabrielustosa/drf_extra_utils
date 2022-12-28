@@ -12,12 +12,12 @@ from rest_framework.test import APIClient
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
 from drf_extra_utils.related_object.tests.serializers import FooSerializer
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
-from drf_extra_utils.tests import models
+from drf_extra_utils.utils.tests import models
 
 
 class FakePermission(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return hasattr(request.user, 'fake_permission')
+        return getattr(request.user, 'fake_permission', False)
 
 
 class RelatedForeignSerializer(RelatedObjectMixin, ModelSerializer):

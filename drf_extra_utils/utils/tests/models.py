@@ -109,3 +109,10 @@ class M21BarAnnotation(models.Model):
 
     class Meta:
         ordering = ['id']
+
+
+# CreateUpdateOnly Model
+
+class BarModel(models.Model):
+    foo = models.CharField(max_length=100)
+    bar = models.IntegerField(null=True, default=0)

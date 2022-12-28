@@ -18,7 +18,10 @@ class RelatedObjectAnnotations:
         if annotation_class is None:
             return None
         related_object_fields = self.related_objects.get(field_name)
-        return annotation_class.get_annotations(*related_object_fields)
+        # TODO ADD THIS TO TESTS
+        serializer = self.get_related_object_serializer(field_name)
+        fields = serializer(fields=related_object_fields).fields.keys()
+        return annotation_class.get_annotations(*fields)
 
     def get_related_object_annotation_class(self, field_name):
         model = self.get_related_object_model(field_name)

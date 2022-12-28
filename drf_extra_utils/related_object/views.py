@@ -22,7 +22,7 @@ class RelatedObjectViewMixin:
     @cached_property
     def related_objects(self):
         nested_fields = dict()
-        pattern = re.compile((r'fields\[(\w+)]'))
+        pattern = re.compile(r'fields\[(\w+)]')
         for field_name, fields in self.request.query_params.items():
             match = pattern.match(field_name)
             if match:

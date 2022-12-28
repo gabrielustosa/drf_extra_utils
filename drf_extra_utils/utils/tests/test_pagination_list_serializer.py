@@ -8,7 +8,7 @@ from rest_framework.fields import IntegerField
 
 from drf_extra_utils.utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.tests.serializers import FooSerializer
-from drf_extra_utils.tests.models import FooModel
+from drf_extra_utils.utils.tests.models import FooModel
 
 
 class FakePaginator:

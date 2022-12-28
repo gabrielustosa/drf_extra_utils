@@ -5,8 +5,8 @@ from django.test import TestCase, RequestFactory
 from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
-from drf_extra_utils.tests import models
-from drf_extra_utils.tests.models import RelatedManyModel, FooModel
+from ...utils.tests import models
+from drf_extra_utils.utils.tests.models import RelatedManyModel, FooModel
 
 from .serializers import FooSerializer
 

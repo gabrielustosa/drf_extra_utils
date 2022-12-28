@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from . import serializers
 
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
-from drf_extra_utils.tests import models
+from ...utils.tests import models
 
 
 class FooViewSet(RelatedObjectViewMixin, ModelViewSet):

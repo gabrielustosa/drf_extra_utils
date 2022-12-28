@@ -18,14 +18,18 @@ class DynamicFieldViewMixin:
 
 class PermissionByActionMixin:
     permission_classes_by_action = {
-        ('default',): [AllowAny],
+        'default': [AllowAny],
     }
 
     def get_permissions_by_action(self, action):
         for actions, permissions in self.permission_classes_by_action.items():
+            if isinstance(actions, str):
+                actions = (actions,)
             if action in actions:
-                return [permission() for permission in permissions]
+                return permissions
 
     def get_permissions(self):
         permissions = self.get_permissions_by_action(self.action)
-        return permissions if permissions else self.get_permissions_by_action('default')
+        if permissions is None:
+            permissions = self.get_permissions_by_action('default')
+        return [permission() for permission in permissions]

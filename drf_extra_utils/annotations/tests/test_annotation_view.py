@@ -9,7 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
 from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
-from drf_extra_utils.tests.models import DummyModelAnnotation, FooModel
+from drf_extra_utils.utils.tests.models import DummyModelAnnotation, FooModel
 from drf_extra_utils.annotations.views import AnnotationViewMixin
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 from drf_extra_utils.utils.views import DynamicFieldViewMixin

@@ -34,7 +34,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "drf_extra_utils.tests",
+    "drf_extra_utils.utils.tests",
 )
 
 PASSWORD_HASHERS = (

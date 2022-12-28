@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
-from drf_extra_utils.tests import models
+from drf_extra_utils.utils.tests import models
 
 
 class FooSerializer(RelatedObjectMixin, ModelSerializer):

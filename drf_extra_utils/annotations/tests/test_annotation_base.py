@@ -34,9 +34,8 @@ def test_intersection_fields():
         assert field in intersection_fields
 
 
-@pytest.mark.parametrize('test_input', ['@all', '*'])
-def test_intersection_all_in_fields(test_input):
-    fields = ['id', 'name', 'test', test_input]
+def test_intersection_star_in_fields():
+    fields = ['id', 'name', 'test', '*']
 
     intersection_fields = list(annotation_class.intersection_fields(fields))
 

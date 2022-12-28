@@ -1,11 +1,10 @@
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import AllowAny
 
 
-class CreateAndUpdateOnlyFieldsMixin:
+class CreateOrUpdateOnlyMixin:
     """
     A mixin for ModelSerializer that allows fields that can be sent only in create methods or fields that only can be
-    sent only in update methods.
+    sent in update methods.
     """
 
     def to_internal_value(self, data):
@@ -30,28 +29,38 @@ class CreateAndUpdateOnlyFieldsMixin:
 
 class PermissionForFieldMixin:
     """
-    A mixin for ModelSerializer that set permissions for performing actions using model's foreign keys fields.
+    A mixin for ModelSerializer that set permissions for performing actions using model instance.
     """
 
-    def get_permissions_for_field(self, field):
+    @property
+    def permissions_for_field(self):
         permissions_for_field = getattr(self.Meta, 'permissions_for_field', dict())
-        for fields, permissions in permissions_for_field.items():
+
+        list_fields = list(permissions_for_field.keys())
+
+        for fields in list_fields:
+            if isinstance(fields, str):
+                permissions_for_field[(fields,)] = permissions_for_field.pop(fields)
+
+        return permissions_for_field
+
+    def get_permissions_for_field(self, field):
+        for fields, permissions in self.permissions_for_field.items():
             if field in fields:
-                return [permission() for permission in permissions]
-        return [AllowAny()]
+                return permissions
+        return []
 
     def check_field_permission(self, field_name, obj):
         request = self.context.get('request')
         view = self.context.get('view')
-        for permission in self.get_permissions_for_field(field_name):
+        for permission in [permission() for permission in self.get_permissions_for_field(field_name)]:
             if not permission.has_object_permission(request, view, obj):
                 raise PermissionDenied(
-                    detail=f'You do not have permission to use `{field_name}` with this id'
+                    detail=f'You do not have permission to use `{field_name}` with id `{obj.id}`.'
                 )
 
     def validate(self, attrs):
-        permissions_for_field = getattr(self.Meta, 'permissions_for_field', dict())
-        for fields in permissions_for_field:
+        for fields in self.permissions_for_field.keys():
             [self.check_field_permission(field, attrs[field]) for field in fields if field in attrs]
         return attrs
 
@@ -61,7 +70,7 @@ class DynamicModelFieldsMixin:
     A mixin for ModelSerializer that takes an additional `fields` argument that controls which fields should be
     displayed.
 
-    There are three field's types which return certain fields that are defined in ModelSerializer, types are:
+    There are three default field's types which return certain fields that are defined in ModelSerializer, these types are:
     - @min - only the `basic` object's fields
     - @default - only the default object's fields
     - @all - all object's fields
@@ -69,6 +78,7 @@ class DynamicModelFieldsMixin:
     You can modify this fields as you want.
     """
     field_types = {'@min': 'min_fields', '@default': 'default_fields'}
+    all_field_type = '@all'
 
     def __init__(self, *args, **kwargs):
         fields = kwargs.pop('fields', None)
@@ -77,7 +87,7 @@ class DynamicModelFieldsMixin:
 
         if fields is not None:
 
-            if '@all' in fields:
+            if self.all_field_type in fields:
                 return
 
             for field in fields:

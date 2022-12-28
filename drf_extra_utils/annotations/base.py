@@ -60,7 +60,7 @@ class AnnotationBase:
         return ChainMap(*annotations_list)
 
     def intersection_fields(self, fields):
-        if '@all' in fields or '*' in fields:
+        if '*' in fields:
             return self.annotation_fields
 
         return set(self.annotation_fields).intersection(fields)

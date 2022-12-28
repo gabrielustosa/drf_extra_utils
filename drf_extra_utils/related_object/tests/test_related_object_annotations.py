@@ -3,7 +3,7 @@ from django.urls import path
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
 
-from drf_extra_utils.tests import models
+from ...utils.tests import models
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
 
 from . import serializers
