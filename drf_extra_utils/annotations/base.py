@@ -9,7 +9,7 @@ from drf_extra_utils.annotations.fields import AnnotationDictField, AnnotationFi
 
 def _get_rest_field_by_annotation(annotation):
     """
-    Return the rest field by the output of a django query expression.
+    This is a helper function that is used to get the appropriate serializer field for a given annotation.
     """
     try:
         return ModelSerializer.serializer_field_mapping[annotation.output_field.__class__]()
@@ -19,11 +19,24 @@ def _get_rest_field_by_annotation(annotation):
 
 class AnnotationBase:
     """
-    That's a base class to create model's annotation class.
+    The AnnotationBase class is a base class for implementing annotation fields in a model. It provides methods for
+    handling the serialization and retrieval of annotation fields.
 
-    class TestAnnotations(AnnotationBase):
-        def test_annotation(self):
-            return models.Value('test')
+    An annotation field is a field that is not stored in the database, but rather is calculated or derived from other
+    fields in the model. Annotation fields can be useful for adding additional information to a model without the need
+    to store it in the database.
+
+    To use the AnnotationBase class, you will need to define a subclass of AnnotationBase and define annotation fields
+    as methods in the subclass.
+
+    example:
+
+        class TestAnnotations(AnnotationBase):
+            def test_annotation(self):
+                return Count('test')
+
+        Then, define an annotation_class attribute on your model that points to this class:
+            - annotation_class = TestAnnotations()
     """
 
     def get_annotation_serializer_fields(self):
@@ -35,9 +48,6 @@ class AnnotationBase:
         return annotation_fields
 
     def get_annotation_serializer_field(self, annotation_name):
-        """
-        Return AnnotationDictField if it's a list of annotations otherwise return a AnnotationField.
-        """
         annotation = self.get_annotation_value(annotation_name)
 
         if isinstance(annotation, dict):

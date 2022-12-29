@@ -1,6 +1,6 @@
 class AnnotationFieldMixin:
     """
-    Mixin for appending annotations in serializer fields.
+    A mixin that allows adding fields to the serializer based on annotations defined in a model's annotation_class.
     """
 
     def get_fields(self):

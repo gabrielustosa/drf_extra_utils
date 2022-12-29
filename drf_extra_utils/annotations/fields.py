@@ -3,7 +3,9 @@ from rest_framework import serializers
 
 class AnnotationDictField(serializers.Field):
     """
-    AnnotationDictField is a field to handle with a list of annotations.
+    AnnotationDictField is a field  to handle a list of annotations in a serializer. It allows you to specify
+    which annotations should be included in the serialized representation of a model instance and how they
+    should be represented.
 
     * Children of this field must be AnnotationField
     """
@@ -29,6 +31,10 @@ class AnnotationDictField(serializers.Field):
 
 
 class AnnotationField(serializers.Field):
+    """
+     It's used to represent a specific field in a Django model that has been annotated with an additional value.
+     This field can be used in a serializer to return the annotated value along with the other fields of the model.
+    """
 
     def __init__(self, *args, **kwargs):
         self.child = kwargs.pop('child')

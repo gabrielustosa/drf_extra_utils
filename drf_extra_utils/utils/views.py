@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 
 class DynamicFieldViewMixin:
     """
-    Mixin that takes additional fields in query_params that controls which fields should be displayed
+    Mixin that takes additional fields in query_params that controls which fields should be displayed.
 
     Example:
         https://example.com/resource/?fields=name,@default

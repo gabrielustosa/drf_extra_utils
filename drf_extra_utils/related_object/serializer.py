@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Prefetch
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -9,6 +10,10 @@ from rest_framework.exceptions import PermissionDenied
 from drf_extra_utils.utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
+
+error_messages = {
+    'dynamic-inheritance': '{class_name} must inherit DynamicModelFieldsMixin.'
+}
 
 
 class RelatedObjectAnnotations:
@@ -23,8 +28,13 @@ class RelatedObjectAnnotations:
         related_object_fields = self.related_objects.get(field_name)
 
         # pass fields to related object serializer to handle if there are a field type in fields like @all or @default
-        serializer = self.get_related_object_serializer(field_name)
-        fields = serializer(fields=related_object_fields).fields.keys()
+        Serializer = self.get_related_object_serializer(field_name)
+        try:
+            fields = Serializer(fields=related_object_fields).fields.keys()
+        except TypeError:
+            raise ImproperlyConfigured(
+                error_messages['dynamic-inheritance'].format(class_name=Serializer.__name__)
+            )
 
         return annotation_class.get_annotations(*fields)
 
@@ -150,7 +160,12 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
                     )
                 })
 
-            related_objects_fields[field_name] = Serializer(**serializer_kwargs)
+            try:
+                related_objects_fields[field_name] = Serializer(**serializer_kwargs)
+            except TypeError:
+                raise ImproperlyConfigured(
+                    error_messages['dynamic-inheritance'].format(class_name=Serializer.__name__)
+                )
 
         return related_objects_fields
 

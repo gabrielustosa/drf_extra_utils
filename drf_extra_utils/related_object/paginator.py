@@ -17,7 +17,7 @@ RELATED_OBJECT_PAGINATED_BY = 100
 @dataclass
 class RelatedObjectPaginator:
     """
-    Paginator for related objects.
+    This is a utility class used to paginate related objects in a Django REST framework serializer
     """
 
     related_object_name: str

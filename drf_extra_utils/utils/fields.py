@@ -9,7 +9,7 @@ class PaginatedListSerializer(serializers.ListSerializer):
     functionality to the serializer. It takes in two optional arguments: filter and paginator.
 
     The filter argument can be used to apply filters to the list of data being serialized.
-    If the filter argument is provided, it is applied to the data using either the filter() method (if available) or
+    If the filter argument is provided, it is applied to the data using either the filter() method (if is a QuerySet) or
     the built-in filter() function.
 
     The paginator must implement paginate_data, num_pages, and get_paginated_data to work properly.
