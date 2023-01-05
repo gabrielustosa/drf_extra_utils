@@ -4,10 +4,9 @@ from django.urls import path
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
 
-from . import serializers
-
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
-from ...utils.tests import models
+
+from tests import models, serializers
 
 
 class FooViewSet(RelatedObjectViewMixin, ModelViewSet):

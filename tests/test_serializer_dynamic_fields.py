@@ -3,7 +3,8 @@ import pytest
 from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
-from drf_extra_utils.utils.tests.models import FooModel
+
+from tests.models import FooModel
 
 
 class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):
@@ -15,8 +16,8 @@ class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):
 
 
 class FooCustomSerializer(DynamicModelFieldsMixin, ModelSerializer):
-    field_types = {'@custom': 'custom_fields', '@test': 'test_fields'}
-    all_field_type = '*'
+    field_type_mapping = {'@custom': 'custom_fields', '@test': 'test_fields'}
+    all_symbol = '*'
 
     class Meta:
         model = FooModel

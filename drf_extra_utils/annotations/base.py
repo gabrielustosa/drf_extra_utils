@@ -7,7 +7,7 @@ from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from drf_extra_utils.annotations.fields import AnnotationDictField, AnnotationField
 
 
-def _get_rest_field_by_annotation(annotation):
+def get_serializer_field_from_annotation(annotation):
     """
     This is a helper function that is used to get the appropriate serializer field for a given annotation.
     """
@@ -54,12 +54,12 @@ class AnnotationBase:
             return AnnotationDictField(children=[
                 AnnotationField(
                     annotation_name=annotation_name,
-                    child=_get_rest_field_by_annotation(annotation)
+                    child=get_serializer_field_from_annotation(annotation)
                 )
                 for annotation_name, annotation in annotation.items()
             ])
 
-        return AnnotationField(annotation_name=annotation_name, child=_get_rest_field_by_annotation(annotation))
+        return AnnotationField(annotation_name=annotation_name, child=get_serializer_field_from_annotation(annotation))
 
     def get_annotation_value(self, annotation_name):
         annotation = getattr(self, annotation_name, None)
@@ -92,7 +92,7 @@ class AnnotationBase:
     @property
     def annotation_fields(self):
         """
-        Return all def names defined in model's annotation class.
+        Return all def names defined in model's annotation class and subclasses.
         """
         return (
             name

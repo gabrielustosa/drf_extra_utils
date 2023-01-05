@@ -2,13 +2,14 @@ import pytest
 
 from collections import OrderedDict
 
-from django.core.paginator import Paginator, InvalidPage
-from rest_framework.exceptions import NotFound
+from django.core.paginator import Paginator
+
 from rest_framework.fields import IntegerField
 
 from drf_extra_utils.utils.fields import PaginatedListSerializer
-from drf_extra_utils.related_object.tests.serializers import FooSerializer
-from drf_extra_utils.utils.tests.models import FooModel
+
+from tests.models import FooModel
+from tests.serializers import FooSerializer
 
 
 class FakePaginator:

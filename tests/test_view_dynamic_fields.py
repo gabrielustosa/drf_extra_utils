@@ -6,8 +6,9 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
+from .models import FooModel
+
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
-from drf_extra_utils.utils.tests.models import FooModel
 from drf_extra_utils.utils.views import DynamicFieldViewMixin
 
 

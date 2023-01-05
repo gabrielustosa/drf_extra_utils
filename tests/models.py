@@ -1,6 +1,6 @@
 from django.db import models
 
-from drf_extra_utils.annotations.tests.annotations import TestAnnotations, RelatedObjectAnnotations
+from tests.annotation_tests.annotations import TestAnnotations, RelatedObjectAnnotations
 
 
 class FooModel(models.Model):

@@ -1,3 +1,5 @@
+from inspect import isfunction
+
 from rest_framework import serializers
 
 from django.db.models import Manager
@@ -8,11 +10,22 @@ class PaginatedListSerializer(serializers.ListSerializer):
     The PaginatedListSerializer class is a subclass of Django Rest Framework's ListSerializer class that adds pagination
     functionality to the serializer. It takes in two optional arguments: filter and paginator.
 
-    The filter argument can be used to apply filters to the list of data being serialized.
-    If the filter argument is provided, it is applied to the data using either the filter() method (if is a QuerySet) or
-    the built-in filter() function.
+    The filter argument can be used to apply filters to the list of data being serialized. If the filter argument is
+    provided, it is applied to the data using either the filter() method (if is a QuerySet) or the built-in filter()
+    function.
 
-    The paginator must implement paginate_data, num_pages, and get_paginated_data to work properly.
+    The paginator to this class must follow pattern.
+
+    class MyPaginator:
+        def paginate_data(data):
+            paginate and return the paginated data.
+
+        @property
+        def num_pages():
+            return paginator num of pages.
+
+        def get_paginated_data(data):
+            return paginated data.
     """
 
     def __init__(self, *args, **kwargs):
@@ -27,7 +40,7 @@ class PaginatedListSerializer(serializers.ListSerializer):
         if self.filter is not None:
             if hasattr(iterable, 'filter'):
                 iterable = iterable.filter(**self.filter)
-            else:
+            elif isfunction(self.filter):
                 iterable = list(filter(self.filter, iterable))
 
         if self.paginator is not None:

@@ -1,8 +1,6 @@
 from django.test import TestCase
 
-from . import serializers
-
-from ...utils.tests import models
+from tests import models, serializers
 
 
 class TestRelatedObjectSerializer(TestCase):

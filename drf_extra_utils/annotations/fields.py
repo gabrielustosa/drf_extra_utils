@@ -3,11 +3,9 @@ from rest_framework import serializers
 
 class AnnotationDictField(serializers.Field):
     """
-    AnnotationDictField is a field  to handle a list of annotations in a serializer. It allows you to specify
-    which annotations should be included in the serialized representation of a model instance and how they
-    should be represented.
+    The AnnotationDictField is a serializer field that can be used to represent a list of annotated fields.
 
-    * Children of this field must be AnnotationField
+    * Children of this field must be AnnotationField.
     """
 
     def __init__(self, *args, **kwargs):

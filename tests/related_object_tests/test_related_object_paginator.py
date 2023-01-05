@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import patch
 
 from django.test import RequestFactory
+
 from rest_framework.exceptions import NotFound
 
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator

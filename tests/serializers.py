@@ -2,7 +2,8 @@ from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
-from drf_extra_utils.utils.tests import models
+
+from tests import models
 
 
 class FooSerializer(RelatedObjectMixin, ModelSerializer):
@@ -77,6 +78,8 @@ class FooAnnotatedSerializer(RelatedObjectMixin, AnnotationFieldMixin, ModelSeri
                 'many': True,
             }
         }
+        min_fields = ('value_1',)
+        default_fields = ('my_id',)
 
 
 class RelatedForeignAnnotationSerializer(RelatedObjectMixin, ModelSerializer):

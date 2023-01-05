@@ -6,8 +6,8 @@ class AnnotationViewMixin:
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        serializer = self.get_serializer_class()
-        model = serializer.Meta.model
+        Serializer = self.get_serializer_class()
+        model = Serializer.Meta.model
 
         annotation_class = getattr(model, 'annotation_class', None)
         if annotation_class:
@@ -18,7 +18,7 @@ class AnnotationViewMixin:
             if fields:
                 try:
                     # pass fields to serializer to handle if there are a field type in fields like @min,@default or @all
-                    fields = serializer(fields=fields.split(',')).fields.keys()
+                    fields = Serializer(fields=fields.split(',')).fields.keys()
                     annotations = annotation_class.get_annotations(*fields)
                 except TypeError:
                     # if the serializer don't inherit DynamicModelFieldsMixin

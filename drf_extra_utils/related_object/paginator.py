@@ -11,6 +11,8 @@ from rest_framework.utils.urls import replace_query_param
 from django.core.paginator import Paginator, InvalidPage
 from django.utils.functional import cached_property
 
+from drf_extra_utils.utils.regex import match_iterator_pattern
+
 RELATED_OBJECT_PAGINATED_BY = 100
 
 
@@ -51,11 +53,7 @@ class RelatedObjectPaginator:
             ['id', 'title'] - it'll return 1.
         """
         pattern = re.compile(r'page\(([0-9_]+)\)')
-        for field_name in self.related_object_fields:
-            match = pattern.match(field_name)
-            if match:
-                return match.group(1)
-        return 1
+        return match_iterator_pattern(pattern, self.related_object_fields, default=1)
 
     @cached_property
     def page_size(self):
@@ -64,14 +62,10 @@ class RelatedObjectPaginator:
 
         example:
             ['id', 'title', 'page_size(50)'] - it'll return 50.
-            ['id', 'title'] - it'll return the default RELATED_OBJECT_PAGINATED_BY value.
+            ['id', 'title'] - it'll return RELATED_OBJECT_PAGINATED_BY value.
         """
         pattern = re.compile(r'page_size\(([0-9_]+)\)')
-        for field_name in self.related_object_fields:
-            match = pattern.match(field_name)
-            if match:
-                return match.group(1)
-        return RELATED_OBJECT_PAGINATED_BY
+        return match_iterator_pattern(pattern, self.related_object_fields, default=RELATED_OBJECT_PAGINATED_BY)
 
     @property
     def field_param(self):
@@ -104,20 +98,22 @@ class RelatedObjectPaginator:
             replace_page_param(4) -> https://example/?fields[model]=@all,page(3)
             result -> https://example/?fields[model]=@all,page(4)
         """
-        if self.get_page_param(self.page_number) not in self.related_object_fields:
-            self.related_object_fields.append(self.get_page_param(self.page_number))
+        page_param = self.get_page_param(self.page_number)
+        if page_param not in self.related_object_fields:
+            self.related_object_fields.append(page_param)
         query_fields = ','.join(self.related_object_fields)
-        return query_fields.replace(self.get_page_param(self.page_number), self.get_page_param(page))
+        return query_fields.replace(page_param, self.get_page_param(page))
 
     def remove_page_param(self):
         """
-        Remove url query page param
+        Remove url query page param.
+
         example:
             remove_page_param() -> https://example/?fields[model]=@all,page(3)
             result -> https://example/?fields[model]=@all
         """
-        fields_list = [field for field in self.related_object_fields if field != self.get_page_param(self.page_number)]
-        return ','.join(fields_list)
+        self.related_object_fields.remove(self.get_page_param(self.page_number))
+        return ','.join(self.related_object_fields)
 
     def get_paginated_data(self, data):
         return OrderedDict([

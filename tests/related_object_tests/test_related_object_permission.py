@@ -10,9 +10,10 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
-from drf_extra_utils.related_object.tests.serializers import FooSerializer
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
-from drf_extra_utils.utils.tests import models
+
+from tests import models
+from tests.serializers import FooSerializer
 
 
 class FakePermission(BasePermission):
@@ -78,4 +79,4 @@ class TestRelatedObjectPermission(TestCase):
         response = self.client.get(f'{url}?fields[foo]=id,bar')
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.data == {'detail': 'You do not have permission to access the related object `foo`'}
+        assert response.data == {'detail': 'You do not have permission to access the related object `foo`.'}

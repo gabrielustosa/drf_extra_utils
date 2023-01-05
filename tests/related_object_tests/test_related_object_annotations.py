@@ -1,12 +1,14 @@
+from parameterized import parameterized
+
 from django.test import TestCase, override_settings
 from django.urls import path
+
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
 
-from ...utils.tests import models
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
 
-from . import serializers
+from tests import models, serializers
 
 
 class TestRelatedObjectAnnotationsMixin:
@@ -28,6 +30,14 @@ class TestRelatedObjectAnnotationsMixin:
         annotation_class = serializer.get_related_object_annotation_class('foo')
 
         assert annotation_class == models.FooModelAnnotated.annotation_class
+
+    def test_related_object_has_annotation_class(self):
+        context = {'related_objects': {'foo': ['id', 'value_1', 'my_id']}}
+        serializer = serializers.RelatedForeignAnnotationSerializer(context=context)
+
+        has_annotation_class = serializer.related_object_has_annotation_class('foo')
+
+        assert has_annotation_class
 
 
 class RelatedForeignViewSet(RelatedObjectViewMixin, ModelViewSet):
@@ -263,3 +273,27 @@ class TestRelatedObjectAnnotations(TestCase):
 
         with self.assertNumQueries(4):
             self.client.get(f'{url}?fields[foo]=@all&fields[foes]=@all&fields[bars]=@all')
+
+    @parameterized.expand([
+        ('@min', {'value_1': 'value_1'}),
+        ('@default', {'my_id': 'my id is: 1'}),
+    ])
+    def test_related_object_annotation_dynamic_fields_in_field_types(self, field_type, expected_data):
+        url = reverse('foreign-retrieve', kwargs={'pk': self.foreign_model.id})
+
+        response = self.client.get(f'{url}?fields[foo]={field_type}')
+
+        assert response.data['foo'] == expected_data
+
+    def test_related_object_annotation_dynamic_fields_all(self):
+        url = reverse('foreign-retrieve', kwargs={'pk': self.foreign_model.id})
+
+        response = self.client.get(f'{url}?fields[foo]=@all')
+
+        expected_data = {
+            'id': self.foo.id,
+            'value_1': 'value_1',
+            'my_id': f'my id is: {self.foo.id}'
+        }
+
+        assert response.data['foo'] == expected_data

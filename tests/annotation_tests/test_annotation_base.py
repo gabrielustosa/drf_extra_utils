@@ -1,12 +1,10 @@
-import pytest
-
 from django.db import models
 
 from rest_framework import serializers
 
 from .annotations import TestAnnotations
 
-from drf_extra_utils.annotations.base import _get_rest_field_by_annotation
+from drf_extra_utils.annotations.base import get_serializer_field_from_annotation
 from drf_extra_utils.annotations.fields import AnnotationField, AnnotationDictField
 
 annotation_class = TestAnnotations()
@@ -147,15 +145,15 @@ def test_get_annotation_serializer_fields():
         assert annotation_fields[key].__class__ == value.__class__
 
 
-def test_get_rest_field_by_annotation():
+def test_get_serializer_field_from_annotation():
     annotation = models.Count('test')
-    rest_field = _get_rest_field_by_annotation(annotation)
+    rest_field = get_serializer_field_from_annotation(annotation)
 
     assert isinstance(rest_field, serializers.IntegerField)
 
 
-def test_get_rest_field_by_annotation_without_output_field():
+def test_get_serializer_field_from_annotation_without_output_field():
     annotation = models.Avg('test')
-    rest_field = _get_rest_field_by_annotation(annotation)
+    rest_field = get_serializer_field_from_annotation(annotation)
 
     assert isinstance(rest_field, serializers.ReadOnlyField)

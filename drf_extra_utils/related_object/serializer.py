@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Prefetch
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -11,41 +10,29 @@ from drf_extra_utils.utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 
-error_messages = {
-    'dynamic-inheritance': '{class_name} must inherit DynamicModelFieldsMixin.'
-}
-
 
 class RelatedObjectAnnotations:
     """
-    Mixin to return related object annotations.
+    A class to handle with related object annotations.
     """
 
-    def get_related_object_annotations(self, field_name):
-        annotation_class = self.get_related_object_annotation_class(field_name)
-        if annotation_class is None:
-            return None
-        related_object_fields = self.related_objects.get(field_name)
+    def related_object_has_annotation_class(self, field_name):
+        return self.get_related_object_annotation_class(field_name) is not None
 
-        # pass fields to related object serializer to handle if there are a field type in fields like @all or @default
+    def get_related_object_annotations(self, field_name):
+        fields = self.related_objects.get(field_name)
+
+        # pass fields to serializer to handle if there are a field type in fields like @min,@default or @all
         Serializer = self.get_related_object_serializer(field_name)
-        try:
-            fields = Serializer(fields=related_object_fields).fields.keys()
-        except TypeError:
-            raise ImproperlyConfigured(
-                error_messages['dynamic-inheritance'].format(class_name=Serializer.__name__)
-            )
+        fields = Serializer(fields=fields).fields.keys()
+
+        annotation_class = self.get_related_object_annotation_class(field_name)
 
         return annotation_class.get_annotations(*fields)
 
     def get_related_object_annotation_class(self, field_name):
         model = self.get_related_object_model(field_name)
         return getattr(model, 'annotation_class', None)
-
-    def optimize_related_object_annotation(self, queryset, field_name, annotations):
-        return queryset.prefetch_related(
-            Prefetch(field_name, self.get_related_object_model(field_name).objects.annotate(**annotations))
-        )
 
 
 class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
@@ -88,8 +75,9 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
     @cached_property
     def related_objects(self):
         related_objects = {}
+        model_related_objects = self.get_related_objects()
         for field_name, fields in self.context.get('related_objects', {}).items():
-            if field_name in self.get_related_objects():
+            if field_name in model_related_objects:
                 related_objects[field_name] = fields
         return related_objects
 
@@ -110,7 +98,7 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
         serializer = self.get_related_object_serializer(field_name)
         return serializer.Meta.model
 
-    def related_object_is_prefetch(self, field_name):
+    def related_object_is_many(self, field_name):
         return self._get_related_object_option(field_name, 'many', False)
 
     def check_related_object_permission(self, obj, related_object_name):
@@ -121,23 +109,25 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
         for permission in [permission() for permission in permissions]:
             if not permission.has_object_permission(request, view, obj):
                 raise PermissionDenied(
-                    detail=f'You do not have permission to access the related object `{related_object_name}`'
+                    detail=f'You do not have permission to access the related object `{related_object_name}`.'
                 )
 
     def optimize_related_object(self, queryset, field_name):
-        if self.related_object_is_prefetch(field_name):
-            queryset = queryset.prefetch_related(field_name)
+        if self.related_object_has_annotation_class(field_name):
+            annotations = self.get_related_object_annotations(field_name)
+            queryset = queryset.prefetch_related(
+                Prefetch(field_name, self.get_related_object_model(field_name).objects.annotate(**annotations))
+            )
         else:
-            queryset = queryset.select_related(field_name)
+            if self.related_object_is_many(field_name):
+                queryset = queryset.prefetch_related(field_name)
+            else:
+                queryset = queryset.select_related(field_name)
         return queryset
 
-    def auto_optimize_related_object(self, queryset):
+    def auto_optimize_related_objects(self, queryset):
         for field_name in self.related_objects.keys():
-            annotations = self.get_related_object_annotations(field_name)
-            if annotations:
-                queryset = self.optimize_related_object_annotation(queryset, field_name, annotations)
-            else:
-                queryset = self.optimize_related_object(queryset, field_name)
+            queryset = self.optimize_related_object(queryset, field_name)
         return queryset
 
     def _get_related_objects_fields(self):
@@ -149,7 +139,7 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
             Serializer = self.get_related_object_serializer(field_name)
             serializer_kwargs = {'fields': fields}
 
-            if self.related_object_is_prefetch(field_name):
+            if self.related_object_is_many(field_name):
                 serializer_kwargs.update({
                     'many': True,
                     'filter': self._get_related_object_option(field_name, 'filter'),
@@ -160,12 +150,7 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
                     )
                 })
 
-            try:
-                related_objects_fields[field_name] = Serializer(**serializer_kwargs)
-            except TypeError:
-                raise ImproperlyConfigured(
-                    error_messages['dynamic-inheritance'].format(class_name=Serializer.__name__)
-                )
+            related_objects_fields[field_name] = Serializer(**serializer_kwargs)
 
         return related_objects_fields
 

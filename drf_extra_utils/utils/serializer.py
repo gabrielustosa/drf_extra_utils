@@ -70,15 +70,29 @@ class DynamicModelFieldsMixin:
     A mixin for ModelSerializer that takes an additional `fields` argument that controls which fields should be
     displayed.
 
-    There are three default field's types which return certain fields that are defined in ModelSerializer, these types are:
+    The field_type_mapping attribute is a dictionary that maps field types to attribute names in the Meta class of the
+    serializer, where:
+        - keys: The symbol which will be in the fields query param.
+            example: https://example.com/fields=@min
+        - values: Field's name defined in serializer Meta.
+            example: min_fields: ('id', 'name', 'test')
+
+    example:
+        class Serializer(DynamicModelFieldsMixin, ModelSerializer):
+            class Meta:
+                model = Model
+                min_fields = ('id', 'test')
+                default_fields = ('id', 'name', 'url')
+
+    There are three default field's types which return certain fields that are defined in ModelSerializer, they are:
     - @min - only the `basic` object's fields
     - @default - only the default object's fields
     - @all - all object's fields
 
     You can modify this fields as you want.
     """
-    field_types = {'@min': 'min_fields', '@default': 'default_fields'}
-    all_field_type = '@all'
+    field_type_mapping = {'@min': 'min_fields', '@default': 'default_fields'}
+    all_symbol = '@all'
 
     def __init__(self, *args, **kwargs):
         fields = kwargs.pop('fields', None)
@@ -87,12 +101,12 @@ class DynamicModelFieldsMixin:
 
         if fields is not None:
 
-            if self.all_field_type in fields:
+            if self.all_symbol in fields:
                 return
 
             for field in fields:
-                if field in self.field_types:
-                    field_values = getattr(self.Meta, self.field_types[field], tuple())
+                if field in self.field_type_mapping:
+                    field_values = getattr(self.Meta, self.field_type_mapping[field], tuple())
                     fields += field_values
 
             allowed = set(fields)

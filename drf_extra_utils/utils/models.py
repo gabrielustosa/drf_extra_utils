@@ -4,6 +4,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TimeStampedBase(models.Model):
+    """
+    An abstract base model class that provides fields for keeping track of when the object was created and last modified.
+    """
+
     created = models.DateTimeField(
         _("Creation Date and Time"),
         auto_now_add=True,
@@ -19,6 +23,11 @@ class TimeStampedBase(models.Model):
 
 
 class CreatorBase(models.Model):
+    """
+    CreatorBase is an abstract Model class that represents a model with a creator field. The creator field is a foreign
+    key to the AUTH_USER_MODEL specified in Django's settings, and is used to store the user who created the object.
+    """
+
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("creator"),
