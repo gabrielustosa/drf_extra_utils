@@ -12,7 +12,7 @@ single annotation, while list annotations represent a collection of annotations.
 To create a default annotation, you can define a function that returns a simple django function annotation. To create a 
 list annotation, you can define a function that returns a dictionary of django function annotations.
 
-## Annotations Example
+## Example
 
 Imagine you have two models in your django application.
 
@@ -81,10 +81,10 @@ Now, four annotations have been defined for the User model:
     To avoid unnecessary queries and improve the performance ensure that all annotations of your model are fetched in a 
     single query, otherwise it'll issue a separate query for each annotation. To include annotations for your model in 
     a queryset, you can use the [ModelAnnotationHandler](/annotation/annotation_api/#modelannotationhandler) class,
-    or you can use the [AnnotationViewMixin](/annotation/annotation/#using-annotation-view-mixin) in your Django REST
+    or you can use the [AnnotationViewMixin](/annotation/#using-annotation-view-mixin) in your Django REST
     views for automatic query optimization
 
-## Using annotation serializer mixin
+### AnnotationSerializerMixin
 
 To activate the annotations in your serializer you'll need to apply the ``AnnotationSerializerMixin`` to your model
 serializer.
@@ -96,7 +96,7 @@ class UserSerializer(AnnotationSerializerMixin, ModelSerializer):
     ...
 ```
 
-#### Model serialization example
+##### Result
 
 ```json
 {
@@ -118,7 +118,7 @@ class UserSerializer(AnnotationSerializerMixin, ModelSerializer):
 }
 ```
 
-## Using annotation view mixin
+### AnnotationViewMixin
 
 To annotate and optimize these model annotations to the model queryset you'll need to apply the ``AnnotationViewMixin`` 
 to your model view.
