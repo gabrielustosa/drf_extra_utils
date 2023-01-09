@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from drf_extra_utils.utils.middleware import get_current_user
+
 
 class TimeStampedBase(models.Model):
     """
@@ -41,7 +43,6 @@ class CreatorBase(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        from drf_extra_utils.utils.middleware import get_current_user
 
         if not self.creator:
             self.creator = get_current_user()

@@ -86,13 +86,13 @@ Now, four annotations have been defined for the User model:
 
 ## Using annotation serializer mixin
 
-To activate the annotations in your serializer you'll need to apply the ``AnnotationFieldMixin`` to your model
+To activate the annotations in your serializer you'll need to apply the ``AnnotationSerializerMixin`` to your model
 serializer.
 
 ```.py3 title="serializers.py"
-from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
+from drf_extra_utils.annotations.serializer import AnnotationSerializerMixin
 
-class UserSerializer(AnnotationFieldMixin, ModelSerializer):
+class UserSerializer(AnnotationSerializerMixin, ModelSerializer):
     ...
 ```
 

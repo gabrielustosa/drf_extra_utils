@@ -26,7 +26,16 @@ class TestCreateOnlyFields(TestCase):
     def setUp(self):
         self.bar = BarModel.objects.create(foo='test')
 
-    def test_create_only_fields(self):
+    def test_create_only_model(self):
+        data = {'foo': 'new foo', 'bar': 8}
+        serializer = CreateOnlySerializer(data=data)
+        serializer.is_valid()
+        model = serializer.save()
+
+        assert model.foo == data['foo']
+        assert model.bar == data['bar']
+
+    def test_create_only_attribute_are_not_defined(self):
         data = {'foo': 'new foo', 'bar': 8}
         serializer = CreateOnlySerializer(self.bar, data=data)
         serializer.is_valid()
@@ -49,7 +58,18 @@ class TestCreateOnlyFields(TestCase):
 
 
 class TestUpdateOnlyFields(TestCase):
-    def test_update_only_fields(self):
+
+    def test_update_only_model(self):
+        data = {'foo': 'new foo', 'bar': 8}
+        bar = BarModel.objects.create(foo='test')
+        serializer = UpdateOnlySerializer(bar, data=data)
+        serializer.is_valid()
+        model = serializer.save()
+
+        assert model.foo == data['foo']
+        assert model.bar == data['bar']
+
+    def test_update_only_attribute_are_not_defined(self):
         data = {'foo': 'new foo', 'bar': 8}
         serializer = UpdateOnlySerializer(data=data)
         serializer.is_valid()

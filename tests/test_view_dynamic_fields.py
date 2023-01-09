@@ -1,5 +1,5 @@
 from django.urls import path
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, RequestFactory
 
 from rest_framework.reverse import reverse
 from rest_framework.serializers import ModelSerializer
@@ -27,6 +27,9 @@ urlpatterns = [
     path('foo/<int:pk>/', FooViewSet.as_view({'get': 'retrieve'}), name='foo-retrieve')
 ]
 
+factory = RequestFactory()
+request = factory.get('/')
+
 
 @override_settings(ROOT_URLCONF=__name__)
 class TestDynamicFieldsView(TestCase):
@@ -50,3 +53,13 @@ class TestDynamicFieldsView(TestCase):
         expected_data = {}
 
         assert response.data == expected_data
+
+    def test_dynamic_fields_in_get_serializer(self):
+        view = FooViewSet(format_kwarg=None)
+        request.query_params = {'fields': 'test,field,model'}
+        view.request = request
+
+        serializer = view.get_serializer()
+
+        assert 'fields' in serializer._kwargs
+        assert serializer._kwargs['fields'] == ['test', 'field', 'model']

@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
+from drf_extra_utils.annotations.serializer import AnnotationSerializerMixin
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
 
 from . import models
@@ -68,7 +68,7 @@ class RelatedMultipleSerializer(RelatedObjectMixin, ModelSerializer):
 
 # RelatedObject Annotations
 
-class FooAnnotatedSerializer(RelatedObjectMixin, AnnotationFieldMixin, ModelSerializer):
+class FooAnnotatedSerializer(RelatedObjectMixin, AnnotationSerializerMixin, ModelSerializer):
     class Meta:
         model = models.FooModelAnnotated
         fields = '__all__'
@@ -105,7 +105,7 @@ class RelatedManyAnnotationSerializer(RelatedObjectMixin, ModelSerializer):
         }
 
 
-class M21AnnotationSerializer(RelatedObjectMixin, AnnotationFieldMixin, ModelSerializer):
+class M21AnnotationSerializer(RelatedObjectMixin, AnnotationSerializerMixin, ModelSerializer):
     class Meta:
         model = models.M21ModelAnnotation
         fields = '__all__'
@@ -142,7 +142,7 @@ class BarAnnotationSerializer(RelatedObjectMixin, ModelSerializer):
         }
 
 
-class M21BarAnnotationSerializer(RelatedObjectMixin, AnnotationFieldMixin, ModelSerializer):
+class M21BarAnnotationSerializer(RelatedObjectMixin, AnnotationSerializerMixin, ModelSerializer):
     class Meta:
         model = models.M21BarAnnotation
         fields = '__all__'

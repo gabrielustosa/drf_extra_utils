@@ -12,15 +12,14 @@ from drf_extra_utils.annotations.handler import ModelAnnotationHandler
 handler = ModelAnnotationHandler(model=YourModel)
 
 # retrieve annotations from your model, which can then be used in a queryset
-all_annotations = handler.get_annotations('*')
-annotations = handler.get_annotations('annotation_field', 'annotation_test') 
-
-# annotating in a queryset
-queryset.annotate(**annotations)
+annotations = handler.get_annotations('annotation_field', 'annotation_test')
+# retrieve all model annotations
+annotations = handler.get_annotations('*')
 
 # check if model has annotations
 if handler.annotations:
-    # has annotations
+    # annotating in a queryset
+    YourModel.objects.annotate(**annotations).get(id=model_id)
 
 ```
 

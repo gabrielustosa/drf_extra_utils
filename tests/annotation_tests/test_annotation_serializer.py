@@ -1,7 +1,7 @@
 from parameterized import parameterized_class
 
 from django.test import TestCase
-from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
+from drf_extra_utils.annotations.serializer import AnnotationSerializerMixin
 from rest_framework.serializers import ModelSerializer
 
 from .models import AnnotatedModel, FooModel
@@ -31,7 +31,7 @@ class TestAnnotationAttribute(TestCase):
         assert annotation_value == self.expected_value
 
 
-class AnnotatedModelSerializer(AnnotationFieldMixin, ModelSerializer):
+class AnnotatedModelSerializer(AnnotationSerializerMixin, ModelSerializer):
     class Meta:
         model = AnnotatedModel
         fields = ('id',)

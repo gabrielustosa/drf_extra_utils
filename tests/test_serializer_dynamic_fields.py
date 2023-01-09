@@ -6,6 +6,7 @@ from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 
 from tests.related_object_tests.models import FooModel
 
+
 class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):
     class Meta:
         model = FooModel
