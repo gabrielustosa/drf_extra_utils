@@ -1,7 +1,7 @@
 from rest_framework.permissions import AllowAny
 
 
-class DynamicFieldViewMixin:
+class DynamicFieldsViewMixin:
     """
     Mixin that takes additional fields in query_params that controls which fields should be displayed.
 

@@ -4,8 +4,7 @@ from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
 
-from tests.models import FooModel
-
+from tests.related_object_tests.models import FooModel
 
 class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):
     class Meta:

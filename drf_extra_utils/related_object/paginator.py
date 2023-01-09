@@ -46,7 +46,7 @@ class RelatedObjectPaginator:
     @cached_property
     def page_number(self):
         """
-        Return a page number which is in related objects fields list.
+        Return the page number that corresponds to the related objects field list
 
         example:
             ['id', 'title', 'page(3)'] - it'll return 3.
@@ -58,7 +58,7 @@ class RelatedObjectPaginator:
     @cached_property
     def page_size(self):
         """
-        Return a page size number which is in related objects fields list.
+        Return the page size that corresponds to the related objects field list
 
         example:
             ['id', 'title', 'page_size(50)'] - it'll return 50.

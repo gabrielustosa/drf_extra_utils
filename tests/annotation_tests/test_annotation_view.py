@@ -8,41 +8,40 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
-from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
-from drf_extra_utils.annotations.views import AnnotationViewMixin
+from drf_extra_utils.annotations.view import AnnotationViewMixin
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
-from drf_extra_utils.utils.views import DynamicFieldViewMixin
+from drf_extra_utils.utils.views import DynamicFieldsViewMixin
 
-from tests.models import DummyModelAnnotation, FooModel
+from .models import AnnotatedModel, FooModel
 
 
-class DummySerializer(AnnotationFieldMixin, ModelSerializer):
+class AnnotatedModelSerializer(ModelSerializer):
     class Meta:
-        model = DummyModelAnnotation
-        fields = '__all__'
+        model = AnnotatedModel
+        fields = ('id', 'count_foo', 'complex_foo', 'list_foo')
 
 
-class DummyViewSet(AnnotationViewMixin, ModelViewSet):
-    serializer_class = DummySerializer
-    queryset = DummyModelAnnotation.objects.all()
+class AnnotatedModelViewSet(AnnotationViewMixin, ModelViewSet):
+    serializer_class = AnnotatedModelSerializer
+    queryset = AnnotatedModel.objects.all()
 
 
-class DummySerializerDynamicFields(AnnotationFieldMixin, DynamicModelFieldsMixin, ModelSerializer):
+class AnnotatedModelSerializerDynamic(DynamicModelFieldsMixin, ModelSerializer):
     class Meta:
-        model = DummyModelAnnotation
-        fields = '__all__'
-        min_fields = ('count_foo', 'list_foo')
-        default_fields = ('list_foo', 'complex_foo')
+        model = AnnotatedModel
+        fields = ('id', 'count_foo', 'complex_foo', 'list_foo')
+        min_fields = ('count_foo',)
+        default_fields = ('list_foo',)
 
 
-class DummyViewSetDynamicFields(AnnotationViewMixin, DynamicFieldViewMixin, ModelViewSet):
-    serializer_class = DummySerializerDynamicFields
-    queryset = DummyModelAnnotation.objects.all()
+class AnnotatedModelViewSetDynamic(AnnotationViewMixin, DynamicFieldsViewMixin, ModelViewSet):
+    serializer_class = AnnotatedModelSerializerDynamic
+    queryset = AnnotatedModel.objects.all()
 
 
 urlpatterns = [
-    path('test/<int:pk>/', DummyViewSet.as_view({'get': 'retrieve'}), name='test-retrieve'),
-    path('dynamic/<int:pk>/', DummyViewSetDynamicFields.as_view({'get': 'retrieve'}), name='dynamic-retrieve'),
+    path('test/<int:pk>/', AnnotatedModelViewSet.as_view({'get': 'retrieve'}), name='test-retrieve'),
+    path('dynamic/<int:pk>/', AnnotatedModelViewSetDynamic.as_view({'get': 'retrieve'}), name='dynamic-retrieve'),
 ]
 
 
@@ -50,89 +49,75 @@ urlpatterns = [
 class TestAnnotationView(TestCase):
 
     def setUp(self):
-        self.dummy_object = DummyModelAnnotation.objects.create()
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_3'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_3'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_3'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_2'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_1'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_1'))
+        self.annotated_model = AnnotatedModel.objects.create()
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_1') for _ in range(2)])
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_2') for _ in range(1)])
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_3') for _ in range(4)])
 
-        self.url = reverse('test-retrieve', kwargs={'pk': self.dummy_object.id})
-        self.dynamic_url = reverse('dynamic-retrieve', kwargs={'pk': self.dummy_object.id})
+        self.url = reverse('test-retrieve', kwargs={'pk': self.annotated_model.id})
+        self.dynamic_url = reverse('dynamic-retrieve', kwargs={'pk': self.annotated_model.id})
 
         self.client = APIClient()
 
-    def test_annotation_view(self):
+    def test_annotation_model_view(self):
         response = self.client.get(self.url)
 
         expected_data = {
-            'id': self.dummy_object.id,
-            'foo': [foo.id for foo in self.dummy_object.foo.all()],
-            'count_foo': 6,
-            'complex_foo': 13,
-            'list_foo': {
-                'test_1': 2,
-                'test_2': 1,
-                'test_3': 3
-            }
+            'id': self.annotated_model.id,
+            'count_foo': 7,
+            'complex_foo': 16,
+            'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 4}
         }
 
         assert response.data == expected_data
 
-    def test_annotation_dynamic_fields_doest_work_without_dynamic_mixin(self):
-        response = self.client.get(f'{self.url}?fields=count_foo,list_foo')
+    def test_annotation_optimization(self):
+        with self.assertNumQueries(1):
+            self.client.get(self.url)
+
+    def test_annotation_model_still_working_without_dynamic_fields_mixin(self):
+        response = self.client.get(f'{self.url}?fields=count_foo')
 
         expected_data = {
-            'id': self.dummy_object.id,
-            'foo': [foo.id for foo in self.dummy_object.foo.all()],
-            'count_foo': 6,
-            'complex_foo': 13,
-            'list_foo': {
-                'test_1': 2,
-                'test_2': 1,
-                'test_3': 3
-            }
+            'id': self.annotated_model.id,
+            'count_foo': 7,
+            'complex_foo': 16,
+            'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 4}
         }
 
         assert response.data == expected_data
 
-    def test_annotation_dynamic_fields_view(self):
+    def test_annotation_model_view_dynamic_fields(self):
         response = self.client.get(f'{self.dynamic_url}?fields=count_foo,list_foo')
 
         expected_data = {
-            'count_foo': 6,
+            'count_foo': 7,
             'list_foo': {
                 'test_1': 2,
                 'test_2': 1,
-                'test_3': 3
+                'test_3': 4
             }
         }
 
         assert response.data == expected_data
 
     @parameterized.expand([
-        ('@default', {'complex_foo': 13, 'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 3}}),
-        ('@min', {'count_foo': 6, 'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 3}}),
+        ('@default', {'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 4}}),
+        ('@min', {'count_foo': 7}),
     ])
-    def test_annotation_dynamic_fields_in_field_types(self, field_type, expected):
+    def test_annotation_model_view_dynamic_field_type(self, field_type, expected):
         response = self.client.get(f'{self.dynamic_url}?fields={field_type}')
 
         assert response.data == expected
 
-    def test_annotation_dynamic_fields_all(self):
+    def test_annotation_model_view_dynamic_field_type_all(self):
         response = self.client.get(f'{self.dynamic_url}?fields=@all')
 
         expected_data = {
-            'id': self.dummy_object.id,
-            'foo': [foo.id for foo in self.dummy_object.foo.all()],
-            'count_foo': 6,
-            'complex_foo': 13,
-            'list_foo': {
-                'test_1': 2,
-                'test_2': 1,
-                'test_3': 3
-            }
+            'id': self.annotated_model.id,
+            'count_foo': 7,
+            'complex_foo': 16,
+            'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 4}
         }
 
         assert response.data == expected_data

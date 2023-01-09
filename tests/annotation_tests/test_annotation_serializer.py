@@ -1,66 +1,58 @@
-from django.test import TestCase
+from parameterized import parameterized_class
 
+from django.test import TestCase
+from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
 from rest_framework.serializers import ModelSerializer
 
-from drf_extra_utils.annotations.serializer import AnnotationFieldMixin
-
-from tests.models import DummyModelAnnotation, FooModel
+from .models import AnnotatedModel, FooModel
 
 
-def annotate_in_model(model):
-    return model.__class__.objects.annotate(
-        **model.annotation_class.get_annotations('*')
-    ).get(id=model.id)
+@parameterized_class(('annotation_name', 'expected_value'), [
+    ('count_foo', 7),
+    ('complex_foo', 16),
+    ('list_foo', {'test_1': 2, 'test_2': 1, 'test_3': 4})
+])
+class TestAnnotationAttribute(TestCase):
 
-
-class DummySerializer(AnnotationFieldMixin, ModelSerializer):
-    class Meta:
-        model = DummyModelAnnotation
-        fields = '__all__'
-
-
-class TestAnnotationSerializer(TestCase):
     def setUp(self):
-        self.dummy_object = DummyModelAnnotation.objects.create()
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_3'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_3'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_3'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_2'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_1'))
-        self.dummy_object.foo.add(FooModel.objects.create(bar=f'test_1'))
+        self.annotated_model = AnnotatedModel.objects.create()
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_1') for _ in range(2)])
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_2') for _ in range(1)])
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_3') for _ in range(4)])
 
-    def test_model_serializer_annotations(self):
-        self.dummy_object = annotate_in_model(self.dummy_object)
+    def test_model_annotation_attribute_optimization(self):
+        with self.assertNumQueries(1):
+            for _ in range(10):
+                getattr(self.annotated_model, self.annotation_name)
 
-        serializer = DummySerializer(self.dummy_object)
+    def test_model_annotation_attribute_fetching(self):
+        annotation_value = getattr(self.annotated_model, self.annotation_name)
+
+        assert annotation_value == self.expected_value
+
+
+class AnnotatedModelSerializer(AnnotationFieldMixin, ModelSerializer):
+    class Meta:
+        model = AnnotatedModel
+        fields = ('id',)
+
+
+class TestAnnotationSerialization(TestCase):
+
+    def setUp(self):
+        self.annotated_model = AnnotatedModel.objects.create()
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_1') for _ in range(2)])
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_2') for _ in range(1)])
+        self.annotated_model.foo.add(*[FooModel.objects.create(bar='test_3') for _ in range(4)])
+
+    def test_model_annotation_serialization(self):
+        serializer = AnnotatedModelSerializer(self.annotated_model)
 
         expected_data = {
-            'id': self.dummy_object.id,
-            'foo': [foo.id for foo in self.dummy_object.foo.all()],
-            'count_foo': 6,
-            'complex_foo': 13,
-            'list_foo': {
-                'test_1': 2,
-                'test_2': 1,
-                'test_3': 3
-            }
-        }
-
-        assert serializer.data == expected_data
-
-    def test_model_serializer_annotations_with_no_annotations(self):
-        serializer = DummySerializer(self.dummy_object)
-
-        expected_data = {
-            'id': self.dummy_object.id,
-            'foo': [foo.id for foo in self.dummy_object.foo.all()],
-            'count_foo': None,
-            'complex_foo': None,
-            'list_foo': {
-                'test_1': None,
-                'test_2': None,
-                'test_3': None
-            }
+            'id': self.annotated_model.id,
+            'count_foo': 7,
+            'complex_foo': 16,
+            'list_foo': {'test_1': 2, 'test_2': 1, 'test_3': 4}
         }
 
         assert serializer.data == expected_data

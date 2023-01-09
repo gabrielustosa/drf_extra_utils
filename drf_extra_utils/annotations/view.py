@@ -1,6 +1,9 @@
+from drf_extra_utils.annotations.handler import ModelAnnotationHandler
+
+
 class AnnotationViewMixin:
     """
-    Mixin for annotate model annotations to queryset.
+    Mixin to include model annotations in a queryset.
     """
 
     def get_queryset(self):
@@ -9,23 +12,23 @@ class AnnotationViewMixin:
         Serializer = self.get_serializer_class()
         model = Serializer.Meta.model
 
-        annotation_class = getattr(model, 'annotation_class', None)
-        if annotation_class:
+        annotation_handler = ModelAnnotationHandler(model=model)
+        if annotation_handler.annotations:
             annotations = None
 
-            # optimize annotations 
+            # optimize annotations
             fields = self.request.query_params.get('fields')
             if fields:
                 try:
                     # pass fields to serializer to handle if there are a field type in fields like @min,@default or @all
                     fields = Serializer(fields=fields.split(',')).fields.keys()
-                    annotations = annotation_class.get_annotations(*fields)
+                    annotations = annotation_handler.get_annotations(*fields)
                 except TypeError:
                     # if the serializer don't inherit DynamicModelFieldsMixin
                     pass
 
             if annotations is None:
-                annotations = annotation_class.get_annotations('*')
+                annotations = annotation_handler.get_annotations('*')
 
             queryset = queryset.annotate(**annotations)
 

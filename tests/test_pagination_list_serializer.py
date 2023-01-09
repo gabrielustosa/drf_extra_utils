@@ -8,8 +8,7 @@ from rest_framework.fields import IntegerField
 
 from drf_extra_utils.utils.fields import PaginatedListSerializer
 
-from tests.models import FooModel
-from tests.serializers import FooSerializer
+from tests.related_object_tests import serializers, models
 
 
 class FakePaginator:
@@ -36,44 +35,46 @@ class FakePaginator:
 class TestRelatedObjectListSerializer:
     def setup_method(self):
         self.objects = [n for n in range(10)]
-        self.models = FooModel.objects.filter(id__in=[FooModel.objects.create(bar='test').id for _ in range(10)])
+        self.models = models.FooModel.objects.filter(
+            id__in=[models.FooModel.objects.create(bar='test').id for _ in range(10)]
+        )
 
     def test_list_serializer_model_filtering(self):
         serializer = PaginatedListSerializer(
-            child=FooSerializer(),
+            child=serializers.FooSerializer(),
             filter={'id__gte': 5}
         )
         data = serializer.to_representation(self.models)
 
-        expected_data = FooSerializer(self.models[4:], many=True).data
+        expected_data = serializers.FooSerializer(self.models[4:], many=True).data
 
         assert data == expected_data
 
     def test_list_serializer_model_pagination(self):
         serializer = PaginatedListSerializer(
-            child=FooSerializer(),
+            child=serializers.FooSerializer(),
             paginator=FakePaginator(),
         )
         data = serializer.to_representation(self.models)
 
         expected_data = {
             'count': 10,
-            'results': FooSerializer(self.models[:2], many=True).data
+            'results': serializers.FooSerializer(self.models[:2], many=True).data
         }
 
         assert data == expected_data
 
     def test_list_serializer_model_without_paginator(self):
-        serializer = PaginatedListSerializer(child=FooSerializer())
+        serializer = PaginatedListSerializer(child=serializers.FooSerializer())
         data = serializer.to_representation(self.models)
 
-        expected_data = FooSerializer(self.models, many=True).data
+        expected_data = serializers.FooSerializer(self.models, many=True).data
 
         assert data == expected_data
 
     def test_list_serializer_model_pagination_and_filtering(self):
         serializer = PaginatedListSerializer(
-            child=FooSerializer(),
+            child=serializers.FooSerializer(),
             paginator=FakePaginator(),
             filter={'id__gte': 5}
         )
@@ -81,14 +82,14 @@ class TestRelatedObjectListSerializer:
 
         expected_data = {
             'count': 6,
-            'results': FooSerializer(self.models[4:6], many=True).data
+            'results': serializers.FooSerializer(self.models[4:6], many=True).data
         }
 
         assert data == expected_data
 
     def test_list_serializer_model_filtering_without_matching(self):
         serializer = PaginatedListSerializer(
-            child=FooSerializer(),
+            child=serializers.FooSerializer(),
             paginator=FakePaginator(),
             filter={'bar': '123'}
         )

@@ -6,38 +6,36 @@ from django.urls import path
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
 
+from drf_extra_utils.annotations.handler import ModelAnnotationHandler
+from drf_extra_utils.annotations.objects import ANNOTATION_PREFIX
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
 
-from tests import models, serializers
+from . import models, serializers
 
 
 class TestRelatedObjectAnnotationsMixin:
-    def test_get_related_object_annotation(self):
+    def test_get_related_object_annotations(self):
         context = {'related_objects': {'foo': ['id', 'value_1', 'my_id']}}
         serializer = serializers.RelatedForeignAnnotationSerializer(context=context)
 
         annotations = serializer.get_related_object_annotations('foo')
 
-        expected_annotations = ['value_1', 'my_id']
+        expected_annotations = [
+            '{0}{1}'.format(ANNOTATION_PREFIX, 'value_1'),
+            '{0}{1}'.format(ANNOTATION_PREFIX, 'my_id')
+        ]
 
         for annotation in expected_annotations:
             assert annotation in annotations
 
-    def test_get_related_object_annotation_class(self):
+    def test_get_related_object_annotation_handler(self):
         context = {'related_objects': {'foo': ['id', 'value_1', 'my_id']}}
         serializer = serializers.RelatedForeignAnnotationSerializer(context=context)
 
-        annotation_class = serializer.get_related_object_annotation_class('foo')
+        annotation_handler = serializer.get_related_object_annotation_handler('foo')
 
-        assert annotation_class == models.FooModelAnnotated.annotation_class
-
-    def test_related_object_has_annotation_class(self):
-        context = {'related_objects': {'foo': ['id', 'value_1', 'my_id']}}
-        serializer = serializers.RelatedForeignAnnotationSerializer(context=context)
-
-        has_annotation_class = serializer.related_object_has_annotation_class('foo')
-
-        assert has_annotation_class
+        assert isinstance(annotation_handler, ModelAnnotationHandler)
+        assert annotation_handler.model == models.FooModelAnnotated
 
 
 class RelatedForeignViewSet(RelatedObjectViewMixin, ModelViewSet):

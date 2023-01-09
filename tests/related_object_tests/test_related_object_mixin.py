@@ -1,7 +1,7 @@
 from rest_framework.fields import IntegerField, CharField
 from rest_framework.serializers import ListSerializer
 
-from .. import serializers
+from . import serializers
 
 
 class TestRelatedObjectMixin:

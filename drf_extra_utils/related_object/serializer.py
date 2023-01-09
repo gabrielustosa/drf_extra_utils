@@ -6,6 +6,7 @@ from django.utils.module_loading import import_string
 
 from rest_framework.exceptions import PermissionDenied
 
+from drf_extra_utils.annotations.handler import ModelAnnotationHandler
 from drf_extra_utils.utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
@@ -16,9 +17,6 @@ class RelatedObjectAnnotations:
     A class to handle with related object annotations.
     """
 
-    def related_object_has_annotation_class(self, field_name):
-        return self.get_related_object_annotation_class(field_name) is not None
-
     def get_related_object_annotations(self, field_name):
         fields = self.related_objects.get(field_name)
 
@@ -26,13 +24,13 @@ class RelatedObjectAnnotations:
         Serializer = self.get_related_object_serializer(field_name)
         fields = Serializer(fields=fields).fields.keys()
 
-        annotation_class = self.get_related_object_annotation_class(field_name)
+        annotation_handler = self.get_related_object_annotation_handler(field_name)
 
-        return annotation_class.get_annotations(*fields)
+        return annotation_handler.get_annotations(*fields)
 
-    def get_related_object_annotation_class(self, field_name):
+    def get_related_object_annotation_handler(self, field_name):
         model = self.get_related_object_model(field_name)
-        return getattr(model, 'annotation_class', None)
+        return ModelAnnotationHandler(model=model)
 
 
 class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
@@ -113,8 +111,8 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
                 )
 
     def optimize_related_object(self, queryset, field_name):
-        if self.related_object_has_annotation_class(field_name):
-            annotations = self.get_related_object_annotations(field_name)
+        annotations = self.get_related_object_annotations(field_name)
+        if annotations:
             queryset = queryset.prefetch_related(
                 Prefetch(field_name, self.get_related_object_model(field_name).objects.annotate(**annotations))
             )

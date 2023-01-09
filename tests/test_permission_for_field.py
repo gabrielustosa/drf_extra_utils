@@ -14,7 +14,7 @@ from rest_framework.test import APIClient
 from drf_extra_utils.utils.serializer import PermissionForFieldMixin
 from drf_extra_utils.utils.views import PermissionByActionMixin
 
-from tests.models import RelatedForeignModel, FooModel
+from tests.related_object_tests.models import FooModel, RelatedForeignModel
 
 
 class FakePermission(BasePermission):

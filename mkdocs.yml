@@ -1,0 +1,27 @@
+site_name: Extra Utils
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme)"
+      primary: red
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    - media: "(prefers-color-scheme: light)"
+      primary: red
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+markdown_extensions:
+    - admonition
+    - pymdownx.details
+    - pymdownx.superfences

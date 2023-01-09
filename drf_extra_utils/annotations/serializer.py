@@ -1,13 +1,17 @@
+from drf_extra_utils.annotations.handler import ModelAnnotationFieldHandler
+
+
 class AnnotationFieldMixin:
     """
-    A mixin that allows adding fields to the serializer based on annotations defined in a model's annotation_class.
+    The AnnotationFieldMixin class is a mixin for serializers that allows adding fields to the serializer based on the
+    annotations of a model.
     """
 
     def get_fields(self):
         fields = super().get_fields()
 
-        annotation_class = getattr(self.Meta.model, 'annotation_class', None)
-        if annotation_class:
-            fields.update(annotation_class.get_annotation_serializer_fields())
+        annotation_handler = ModelAnnotationFieldHandler(model=self.Meta.model)
+        if annotation_handler.annotations:
+            fields.update(annotation_handler.get_annotation_serializer_fields())
 
         return fields

@@ -6,10 +6,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
-from .models import FooModel
+from tests.related_object_tests.models import FooModel
 
 from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
-from drf_extra_utils.utils.views import DynamicFieldViewMixin
+from drf_extra_utils.utils.views import DynamicFieldsViewMixin
 
 
 class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):
@@ -18,7 +18,7 @@ class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):
         fields = '__all__'
 
 
-class FooViewSet(DynamicFieldViewMixin, ModelViewSet):
+class FooViewSet(DynamicFieldsViewMixin, ModelViewSet):
     queryset = FooModel.objects.all()
     serializer_class = FooSerializer
 

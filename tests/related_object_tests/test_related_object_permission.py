@@ -12,8 +12,7 @@ from rest_framework.test import APIClient
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
 from drf_extra_utils.related_object.views import RelatedObjectViewMixin
 
-from tests import models
-from tests.serializers import FooSerializer
+from . import models, serializers
 
 
 class FakePermission(BasePermission):
@@ -27,7 +26,7 @@ class RelatedForeignSerializer(RelatedObjectMixin, ModelSerializer):
         fields = '__all__'
         related_objects = {
             'foo': {
-                'serializer': FooSerializer,
+                'serializer': serializers.FooSerializer,
                 'permissions': [FakePermission],
             },
         }

@@ -1,13 +1,9 @@
 from unittest.mock import patch
-
 from django.test import TestCase, RequestFactory
-
 from rest_framework.serializers import ModelSerializer
-
 from drf_extra_utils.related_object.serializer import RelatedObjectMixin
 
-from tests import models
-from tests.serializers import FooSerializer
+from . import models, serializers
 
 
 class RelatedManySerializer(RelatedObjectMixin, ModelSerializer):
@@ -16,7 +12,7 @@ class RelatedManySerializer(RelatedObjectMixin, ModelSerializer):
         fields = '__all__'
         related_objects = {
             'foes': {
-                'serializer': FooSerializer,
+                'serializer': serializers.FooSerializer,
                 'many': True,
                 'filter': {'bar__startswith': 'test'}
             }
