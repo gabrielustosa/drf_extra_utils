@@ -8,8 +8,8 @@ from rest_framework.test import APIClient
 
 from tests.related_object_tests.models import FooModel
 
-from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
-from drf_extra_utils.utils.views import DynamicFieldsViewMixin
+from drf_extra_utils.serializers import DynamicModelFieldsMixin
+from drf_extra_utils.views import DynamicFieldsViewMixin
 
 
 class FooSerializer(DynamicModelFieldsMixin, ModelSerializer):

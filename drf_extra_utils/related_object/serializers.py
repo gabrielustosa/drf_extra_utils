@@ -7,9 +7,9 @@ from django.utils.module_loading import import_string
 from rest_framework.exceptions import PermissionDenied
 
 from drf_extra_utils.annotations.handler import ModelAnnotationHandler
-from drf_extra_utils.utils.fields import PaginatedListSerializer
+from drf_extra_utils.fields import PaginatedListSerializer
 from drf_extra_utils.related_object.paginator import RelatedObjectPaginator
-from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
+from drf_extra_utils.serializers import DynamicModelFieldsMixin
 
 
 class RelatedObjectAnnotations:

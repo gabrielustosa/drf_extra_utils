@@ -6,8 +6,8 @@
 If you want to manage model annotations, you can use the ModelAnnotationHandler class. This class provides the tools and 
 methods necessary to handle model annotations.
 
-```.py3
-from drf_extra_utils.annotations.handler import ModelAnnotationHandler
+```python
+from drf_extra_utils.annotations import ModelAnnotationHandler
 
 handler = ModelAnnotationHandler(model=YourModel)
 
@@ -27,10 +27,10 @@ if handler.annotations:
 
 To get the serializer fields for model annotations, you can use the ModelAnnotationFieldHandler class.
 
-```.py3
-from drf_extra_utils.annotations.handler import ModelAnnotationFieldHandler
+```python
+from drf_extra_utils.annotations import ModelAnnotationFieldHandler
 
-handler = ModelAnnotationFieldHander(model=YourModel)
+handler = ModelAnnotationFieldHandler(model=YourModel)
 
 fields = handler.get_annotation_serializer_fields()
 

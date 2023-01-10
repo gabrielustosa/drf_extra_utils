@@ -11,7 +11,7 @@ include:
 
 - [Annotations](/annotation/): Allows you to annotate your models with additional information that can be used in your 
   serializers and views.
-- Related Object: Allows you to easily retrieve your model related objects in your responses, with support for
+- [Related Object](/related_object/): Allows you to easily retrieve your model related objects in your responses, with support for
   filtering, permissions, and pagination.
 - Serializer: Provide a set of mixins that you can use in your serializers and views to add common functionality, such
   as DynamicFields, PermissionForField, CreateOrUpdateOnly

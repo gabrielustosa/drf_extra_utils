@@ -3,7 +3,7 @@ import pytest
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 
-from drf_extra_utils.utils.views import PermissionByActionMixin
+from drf_extra_utils.views import PermissionByActionMixin
 
 
 class RelatedObjectViewSet(PermissionByActionMixin, APIView):

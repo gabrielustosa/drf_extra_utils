@@ -1,6 +1,6 @@
 from django.db import models
 
-from drf_extra_utils.utils.models import TimeStampedBase, CreatorBase
+from drf_extra_utils.models import TimeStampedBase, CreatorBase
 
 
 # CreateUpdateOnly Model

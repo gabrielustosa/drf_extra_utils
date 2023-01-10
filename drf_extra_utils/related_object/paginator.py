@@ -11,7 +11,7 @@ from rest_framework.utils.urls import replace_query_param
 from django.core.paginator import Paginator, InvalidPage
 from django.utils.functional import cached_property
 
-from drf_extra_utils.utils.regex import match_iterator_pattern
+from drf_extra_utils.regex import match_iterator_pattern
 
 RELATED_OBJECT_PAGINATED_BY = 100
 

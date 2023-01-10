@@ -24,6 +24,6 @@ class TestCreatorBaseModel:
             email='test@example.com',
         )
 
-        with patch('drf_extra_utils.utils.models.get_current_user', return_value=user):
+        with patch('drf_extra_utils.models.get_current_user', return_value=user):
             obj = CreatorModel.objects.create()
             assert obj.creator == user

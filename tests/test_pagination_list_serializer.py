@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 
 from rest_framework.fields import IntegerField
 
-from drf_extra_utils.utils.fields import PaginatedListSerializer
+from drf_extra_utils.fields import PaginatedListSerializer
 
 from tests.related_object_tests import serializers, models
 

@@ -1,6 +1,6 @@
 import re
 
-from drf_extra_utils.utils.regex import match_iterator_pattern
+from drf_extra_utils.regex import match_iterator_pattern
 
 
 def test_match_iterator_pattern():

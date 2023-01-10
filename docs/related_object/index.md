@@ -14,12 +14,14 @@ For the purpose of this example, let's assume that you have a model that have al
 
 In the model serializer class, the related objects should be declared in the Meta class as a dictionary.
 
-```.py3 title='serializers.py'
+```python title='serializers.py'
 
-from drf_extra_utils.related_object.serializer import RelatedObjectMixin
+from drf_extra_utils.related_object import RelatedObjectMixin
+
 
 class MyModelSerializer(RelatedObjectMixin, ModelSerializer):
     ...
+
     class Meta:
         ...
         related_objects = {
@@ -56,7 +58,7 @@ include, and the values should be lists of field names that you want to include 
 
 ##### Example
 
-```.py3
+```python
 context={
     'related_objects': {
         'user': ['@all'], 
@@ -109,20 +111,22 @@ respective dictionary values.
 
 ##### Example
 
-```.py3 title='serializers.py'
+```python title='serializers.py'
 
-from drf_extra_utils.related_object.serializer import RelatedObjectMixin
+from drf_extra_utils.related_object import RelatedObjectMixin
+
 
 class MyModelSerializer(RelatedObjectMixin, ModelSerializer):
     ...
+
     class Meta:
         ...
         related_objects = {
             ...
-            'questions': {
-                'serializer': 'path.to.serializer.QuestionSerializer',
-                'many': True,
-                'filter': {'is_published': True}
+        'questions': {
+            'serializer': 'path.to.serializer.QuestionSerializer',
+            'many': True,
+            'filter': {'is_published': True}
             },
         }
 ```
@@ -146,7 +150,7 @@ class MyModelSerializer(RelatedObjectMixin, ModelSerializer):
 
 To pass additional information to the filter on the fly, you can override the get_related_objects method as follows:
 
-```.py3 title="serializers.py"
+```python title="serializers.py"
 
 class MyModelSerializer(RelatedObjectMixin, ModelSerializer):
     ...
@@ -180,21 +184,23 @@ a list of permissions.
 
 ##### Example
 
-```.py3 title='serializers.py'
+```python title='serializers.py'
 
-from drf_extra_utils.related_object.serializer import RelatedObjectMixin
+from drf_extra_utils.related_object import RelatedObjectMixin
+
 
 class MyModelSerializer(RelatedObjectMixin, ModelSerializer):
     ...
+
     class Meta:
         ...
         related_objects = {
             ...
-            'friends': {
-                'serializer': UserSerializer,
-                'many': True,
-                'permissions': [IsFriend]
-            }
+        'friends': {
+            'serializer': UserSerializer,
+            'many': True,
+            'permissions': [IsFriend]
+        }
         }
 ```
 
@@ -217,7 +223,7 @@ The page size default value is 100.
 
 ##### Example
 
-```.py3
+```python
 context={
     'related_objects': {
         'friends': ['@all,page(1), page_size(2)'], 
@@ -257,8 +263,8 @@ serializer = MyModelSerializer(instance, context=context)
 To optimize and simplify the use of related objects in your Django REST framework views, you can use the 
 `RelatedObjectViewMixin`.
 
-```.py3 title="views.py"
-from drf_extra_utils.related_object.views import RelatedObjectViewMixin
+```python title="views.py"
+from drf_extra_utils.related_object import RelatedObjectViewMixin
 
 
 class MyModelView(RelatedObjectViewMixin, ModelViewSet):

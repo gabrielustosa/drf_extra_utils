@@ -11,8 +11,8 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
-from drf_extra_utils.utils.serializer import PermissionForFieldMixin
-from drf_extra_utils.utils.views import PermissionByActionMixin
+from drf_extra_utils.serializers import PermissionForFieldMixin
+from drf_extra_utils.views import PermissionByActionMixin
 
 from tests.related_object_tests.models import FooModel, RelatedForeignModel
 

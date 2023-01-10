@@ -2,7 +2,7 @@ import pytest
 
 from rest_framework.serializers import ModelSerializer
 
-from drf_extra_utils.utils.serializer import DynamicModelFieldsMixin
+from drf_extra_utils.serializers import DynamicModelFieldsMixin
 
 from tests.related_object_tests.models import FooModel
 

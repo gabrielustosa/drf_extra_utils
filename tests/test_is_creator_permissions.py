@@ -8,7 +8,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.test import APIClient
 
-from drf_extra_utils.utils.permissions import IsCreator
+from drf_extra_utils.permissions import IsCreator
 from .models import CreatorModel
 
 

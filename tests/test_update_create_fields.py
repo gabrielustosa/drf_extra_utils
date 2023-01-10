@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from rest_framework.serializers import ModelSerializer
 
-from drf_extra_utils.utils.serializer import CreateOrUpdateOnlyMixin
+from drf_extra_utils.serializers import CreateOrUpdateOnlyMixin
 
 from tests.models import BarModel
 

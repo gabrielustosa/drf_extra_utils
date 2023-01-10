@@ -16,7 +16,7 @@ list annotation, you can define a function that returns a dictionary of django f
 
 Imagine you have two models in your django application.
 
-```.py3
+```python
 from django.db import models
 
 class Project(models.Model):
@@ -29,36 +29,37 @@ class User(models.Model):
 
 Let's create a few annotations for this model.
 
-```.py3 title='models.py'
-from drf_extra_utils.annotations.decorator import model_annotation
-from drf_extra_utils.utils.middleware import get_current_user
+```python title='models.py'
+from drf_extra_utils.annotations import model_annotation
+from drf_extra_utils.middleware import get_current_user
 
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 
+
 class User(models.Model):
     ...
-    
+
     @model_annotation
     def projects_count(self):
         return models.Count('projects')
-     
+
     @model_annotation
     def projects_status_count(self):
         return {
             option: models.Count('projects', filter=models.Q(status=option))
             for option in ('done', 'in_progress', 'canceled')
         }
-       
+
     @model_annotation
     def in_progress_projects_id(self):
         return ArrayAgg('projects__id', filter=models.Q(status='in_progress'))
-    
-    @model_annotation 
+
+    @model_annotation
     def last_project_id(self):
         user = get_current_user()
         user_projects = user.projects.all()
-        
+
         return models.Subquery(
             user_projects.order_by('-created').values('id')[:1]
         )
@@ -89,8 +90,8 @@ Now, four annotations have been defined for the User model:
 To activate the annotations in your serializer you'll need to apply the ``AnnotationSerializerMixin`` to your model
 serializer.
 
-```.py3 title="serializers.py"
-from drf_extra_utils.annotations.serializer import AnnotationSerializerMixin
+```python title="serializers.py"
+from drf_extra_utils.annotations import AnnotationSerializerMixin
 
 class UserSerializer(AnnotationSerializerMixin, ModelSerializer):
     ...
@@ -123,8 +124,8 @@ class UserSerializer(AnnotationSerializerMixin, ModelSerializer):
 To annotate and optimize these model annotations to the model queryset you'll need to apply the ``AnnotationViewMixin`` 
 to your model view.
 
-```.py3 title="views.py"
-from drf_extra_utils.annotations.view import AnnotationViewMixin
+```python title="views.py"
+from drf_extra_utils.annotations import AnnotationViewMixin
 
 class UserView(AnnotationViewMixin, APIView):
     ...

@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from drf_extra_utils.annotations.serializer import AnnotationSerializerMixin
-from drf_extra_utils.related_object.serializer import RelatedObjectMixin
+from drf_extra_utils.related_object.serializers import RelatedObjectMixin
 
 from . import models
 
