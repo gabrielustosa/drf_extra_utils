@@ -20,3 +20,13 @@ class DateTimeModel(TimeStampedBase):
 
 class CreatorModel(CreatorBase):
     pass
+
+
+# GenericField model
+
+class Text(models.Model):
+    content = models.TextField()
+
+
+class Link(models.Model):
+    url = models.URLField()
