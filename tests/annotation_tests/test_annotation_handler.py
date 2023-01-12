@@ -21,6 +21,13 @@ def test_get_serializer_field_from_annotation_without_output_field():
     assert isinstance(rest_field, ReadOnlyField)
 
 
+def test_get_serializer_field_from_annotation_is_ready_only():
+    annotation = models.Count('test')
+    field = get_serializer_field_from_annotation(annotation)
+
+    assert field.read_only
+
+
 class HandlerModel(models.Model):
     test = models.TextField()
 
