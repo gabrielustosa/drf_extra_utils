@@ -76,6 +76,7 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
         model_related_objects = self.get_related_objects()
         for field_name, fields in self.context.get('related_objects', {}).items():
             if field_name in model_related_objects:
+                self.check_related_object_permission(field_name)
                 related_objects[field_name] = fields
         return related_objects
 
@@ -99,15 +100,26 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
     def related_object_is_many(self, field_name):
         return self._get_related_object_option(field_name, 'many', False)
 
-    def check_related_object_permission(self, obj, related_object_name):
-        permissions = self._get_related_object_option(related_object_name, 'permissions', [])
+    def check_related_object_permission_object(self, related_object, obj):
+        permissions = self._get_related_object_option(related_object, 'permissions', [])
 
         request = self.context.get('request')
         view = self.context.get('view')
         for permission in [permission() for permission in permissions]:
             if not permission.has_object_permission(request, view, obj):
                 raise PermissionDenied(
-                    detail=f'You do not have permission to access the related object `{related_object_name}`.'
+                    detail=f'You do not have permission to access the related object `{related_object}`.'
+                )
+
+    def check_related_object_permission(self, related_object):
+        permissions = self._get_related_object_option(related_object, 'permissions', [])
+
+        request = self.context.get('request')
+        view = self.context.get('view')
+        for permission in [permission() for permission in permissions]:
+            if not permission.has_permission(request, view):
+                raise PermissionDenied(
+                    detail=f'You do not have permission to access the related object `{related_object}`.'
                 )
 
     def optimize_related_object(self, queryset, field_name):
@@ -132,7 +144,8 @@ class RelatedObjectMixin(DynamicModelFieldsMixin, RelatedObjectAnnotations):
         related_objects_fields = OrderedDict()
 
         for field_name, fields in self.related_objects.items():
-            self.check_related_object_permission(self.instance, field_name)
+            # may raise an exception
+            self.check_related_object_permission_object(field_name, self.instance)
 
             Serializer = self.get_related_object_serializer(field_name)
             serializer_kwargs = {'fields': fields}

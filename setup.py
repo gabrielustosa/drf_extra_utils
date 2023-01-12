@@ -5,7 +5,7 @@ with open('README.md') as readme:
 
 setup(
     name='drf-extra-utils',
-    version='1.0.3',
+    version='1.0.4',
     license='MIT License',
     author='Gabriel Lustosa',
     long_description=README,

@@ -32,6 +32,7 @@ class RelatedObjectViewMixin:
         return context
 
     def get_auto_optimized_queryset(self, queryset):
-        serializer = self.get_serializer_class()(context={'related_objects': self.related_objects})
+        context = {'related_objects': self.related_objects, 'request': self.request, 'view': self}
+        serializer = self.get_serializer_class()(context=context)
         queryset = serializer.auto_optimize_related_objects(queryset)
         return queryset
